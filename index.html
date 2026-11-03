@@ -68,17 +68,18 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT & AI SEARCH -->
+        <!-- CỘT TRÁI: MASCOT HOẠT HÌNH CUTE + AI SEARCH -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
-                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mascot-float shadow-inner">
-                    🤖🚋
+                <!-- Hình ảnh bé tàu hoạt hình cute mà bồ vừa gửi[cite: 8] -->
+                <div class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden">
+                    <img src="https://i.ibb.co/3yk7v8zY/image.png" alt="Eco Tram Mascot" class="w-full h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1557683316-973673baf926?w=150'">
                 </div>
                 <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                     AI Active
                 </div>
             </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco AI Assistant</h3>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
             <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel guide!</p>
             
             <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full mb-3">
@@ -103,7 +104,6 @@
             
             <!-- TAB 1: LIVE FORECAST -->
             <div id="tab-content-forecast" class="space-y-4">
-                <!-- STOP SELECTION CARD -->
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
                     <label for="stop-select" class="block text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">Select Your Stop</label>
                     <select id="stop-select" onchange="onStopChange()" class="w-full px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold bg-emerald-50/30 text-emerald-900">
@@ -111,15 +111,12 @@
                     </select>
                 </div>
 
-                <!-- ERROR CONTAINER -->
                 <div id="error-container" class="hidden bg-red-50 border border-red-200 text-red-600 p-4 rounded-3xl text-xs font-semibold"></div>
 
-                <!-- SERVICE MESSAGE -->
                 <div id="service-message-box" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-3xl text-xs font-medium flex items-center gap-2">
                     <span>⚠️</span> <span id="service-message-text">Normal service operating.</span>
                 </div>
 
-                <!-- LIVE FORECAST BOARD -->
                 <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden">
                     <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
                         <div>
@@ -155,7 +152,6 @@
                         </div>
                     </div>
 
-                    <!-- Visual Route Map Simulation (Giống sơ đồ tuyến metro nối đuôi nhau) -->
                     <div id="visual-route-map" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
                         <span class="text-xs text-slate-400 italic">Loading map stations...</span>
                     </div>
@@ -187,7 +183,6 @@
             });
         });
 
-        // Switch between Tabs
         function switchTab(tabName) {
             const forecastTab = document.getElementById('tab-content-forecast');
             const mapTab = document.getElementById('tab-content-map');
@@ -272,7 +267,7 @@
             if (matchedStop) {
                 document.getElementById('stop-select').value = matchedStop.id;
                 onStopChange();
-                switchTab('forecast'); // Nhảy về tab forecast để xem luôn
+                switchTab('forecast');
                 speech.innerText = `🎉 Found it! Jumped to ${matchedStop.name}!`;
                 document.getElementById('ai-query-input').value = '';
             } else {
@@ -287,11 +282,10 @@
             renderVisualRouteMap(currentMapLine);
         }
 
-        // Chọn trạm trực tiếp từ Visual Route Map
         function selectStopFromMap(stopId) {
             document.getElementById('stop-select').value = stopId;
             onStopChange();
-            switchTab('forecast'); // Bấm vào trạm là tự động chuyển qua tab Live Forecast xem giờ luôn
+            switchTab('forecast');
         }
 
         function filterMapLine(line) {
@@ -308,7 +302,6 @@
             renderVisualRouteMap(line);
         }
 
-        // Vẽ sơ đồ tuyến đường các trạm nối tiếp nhau giống bản đồ metro
         function renderVisualRouteMap(line) {
             const container = document.getElementById('visual-route-map');
             const filteredStops = allStopsData.filter(s => (s.line || '').toLowerCase() === line);
@@ -325,7 +318,6 @@
                 const isSelected = s.id === currentSelectedId;
                 html += `
                     <div onclick="selectStopFromMap('${s.id}')" class="relative group cursor-pointer flex items-center justify-between p-3 rounded-2xl border transition ${isSelected ? 'bg-emerald-500 text-white border-emerald-600 shadow-md' : 'bg-white hover:bg-emerald-50/60 border-emerald-100 text-emerald-950'}">
-                        <!-- Dot indicator on line -->
                         <span class="absolute -left-6 w-3 h-3 rounded-full border-2 ${isSelected ? 'bg-white border-emerald-600 scale-125' : 'bg-emerald-200 border-white'} transition"></span>
                         
                         <div class="flex items-center gap-2.5">
