@@ -1,164 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luas Eco-Journey 🚋✨</title>
-    <!-- Tailwind CSS for modern, sleek design -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Quicksand (friendly, cute, rounded vibe) -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: #f4fbf7;
-            color: #2d3748;
-        }
-        /* Float animation for the mascot */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
-        }
-        .mascot-float {
-            animation: float 3s ease-in-out infinite;
-        }
-        /* Soft scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2f4ec;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4ade80;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-200">
-
-    <!-- HEADER -->
-    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="text-3xl">🚋</span>
-                <div>
-                    <h1 class="font-bold text-lg text-emerald-800 leading-tight">Luas Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Green Transit &bull; Dublin Live Data 🌿</p>
-                </div>
-            </div>
-            <!-- Tab Navigation -->
-            <div class="flex bg-emerald-50 p-1 rounded-2xl border border-emerald-100">
-                <button onclick="switchTab('forecast')" id="tab-forecast" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm">
-                    ✨ Live Forecast
-                </button>
-                <button onclick="switchTab('network')" id="tab-network" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60">
-                    🗺️ Network Stops
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-        
-        <!-- LEFT / BOTTOM COLUMN: MASCOT COMPANION -->
-        <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
-            <div class="relative mb-3">
-                <!-- Mascot Icon -->
-                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mascot-float shadow-inner">
-                    🌿🚋
-                </div>
-                <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                    Online
-                </div>
-            </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel assistant!</p>
-            
-            <!-- Speech Bubble -->
-            <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full">
-                <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Hello! Select or enter a stop code on the right, and I'll fetch the live Luas forecast for you right away!
-                </p>
-            </div>
-
-            <div class="mt-4 text-[11px] text-emerald-500 font-medium bg-emerald-50/50 px-3 py-1.5 rounded-xl w-full border border-emerald-100/60">
-                ⚡ Relay active until Nov 19, 2026
-            </div>
-        </div>
-
-        <!-- RIGHT / TOP COLUMN: CONTENT SECTIONS -->
-        <div class="md:col-span-2">
-            
-            <!-- TAB 1: FORECAST -->
-            <div id="section-forecast" class="space-y-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
-                    <h2 class="font-bold text-emerald-900 text-base mb-2 flex items-center gap-2">
-                        <span>🔍</span> Live Tram Forecast
-                    </h2>
-                    <p class="text-xs text-slate-500 mb-4">Enter or pick a Luas stop code (e.g., <code class="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-bold">MYS</code> for Mayor Square - NCI).</p>
-                    
-                    <div class="flex gap-2">
-                        <input type="text" id="stop-input" placeholder="Enter stop code (e.g. MYS, STS...)" value="MYS" class="flex-grow px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold uppercase">
-                        <button onclick="fetchForecast()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm flex items-center gap-1.5">
-                            <span>Search</span> ✨
-                        </button>
-                    </div>
-
-                    <!-- Quick Suggestions -->
-                    <div class="flex flex-wrap gap-1.5 mt-3">
-                        <span class="text-xs text-slate-400 self-center mr-1">Quick pick:</span>
-                        <button onclick="quickSelect('MYS')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">Mayor Square (MYS)</button>
-                        <button onclick="quickSelect('STS')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">St. Stephen's (STS)</button>
-                        <button onclick="quickSelect('TPT')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">The Point (TPT)</button>
-                    </div>
-                </div>
-
-                <!-- Forecast Result Container -->
-                <div id="forecast-result" class="space-y-3">
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-400 text-sm">
-                        Click "Search" to view upcoming tram schedules! 🚋
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: NETWORK -->
-            <div id="section-network" class="hidden space-y-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
-                    <h2 class="font-bold text-emerald-900 text-base mb-2 flex items-center gap-2">
-                        <span>🗺️</span> Luas Network Stops
-                    </h2>
-                    <p class="text-xs text-slate-500 mb-4">Explore all stations across the Red and Green lines.</p>
-                    
-                    <div class="flex gap-2">
-                        <button onclick="fetchNetwork('red')" id="btn-red" class="flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-red-50 text-red-700 transition shadow-sm">
-                            🔴 Red Line
-                        </button>
-                        <button onclick="fetchNetwork('green')" id="btn-green" class="flex-1 py-2.5 rounded-2xl text-sm font-bold border border-emerald-200 bg-white text-emerald-700 transition shadow-sm">
-                            🟢 Green Line
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Network Result Container -->
-                <div id="network-result" class="space-y-3">
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-400 text-sm">
-                        Red Line selected. Click the tab to load stations! 🌿
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="text-center py-6 text-xs text-emerald-600 font-medium">
-        Made with 💚 and Eco-vibe for Luas Class Relay &bull; Powered by TII Data
-    </footer>
-
-    <!-- JAVASCRIPT LOGIC -->
+<!-- JAVASCRIPT LOGIC -->
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
 
@@ -181,12 +21,13 @@
                 networkSec.classList.remove('hidden');
                 tabNetwork.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm";
                 tabForecast.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60";
-                mascotSpeech.innerText = "🗺️ Welcome to the Network Map! I have automatically loaded the Red Line stations for you.";
-                fetchNetwork('red');
+                mascotSpeech.innerText = "🗺️ Welcome to the Network Map! I am fetching all stations for you.";
+                fetchAllStopsAndFilter('red');
             }
         }
 
         function quickSelect(stopCode) {
+            switchTab('forecast');
             document.getElementById('stop-input').value = stopCode;
             fetchForecast();
         }
@@ -293,8 +134,8 @@
             resultDiv.innerHTML = html;
         }
 
-        // Fetch Network API
-        async function fetchNetwork(line) {
+        // Fetch All Stops via /stops and filter by line (Red/Green)
+        async function fetchAllStopsAndFilter(line) {
             const resultDiv = document.getElementById('network-result');
             const btnRed = document.getElementById('btn-red');
             const btnGreen = document.getElementById('btn-green');
@@ -307,18 +148,24 @@
                 btnRed.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-white text-red-700 transition shadow-sm";
             }
 
-            showLoading('network-result', `Mascot is gathering stations for the ${line.toUpperCase()} Line...`);
+            showLoading('network-result', `Mascot is fetching and filtering stations for the ${line.toUpperCase()} Line...`);
 
             try {
-                const response = await fetch(`${BASE_URL}/network?line=${line}`);
-                if (!response.ok) throw new Error('Failed to load network data.');
-                const stops = await response.json();
+                const response = await fetch(`${BASE_URL}/stops`);
+                if (!response.ok) throw new Error('Failed to load stops data.');
+                const allStops = await response.json();
 
-                renderNetwork(stops, line);
+                // Lọc trạm dựa theo thuộc tính line hoặc tên tuyến
+                const filteredStops = allStops.filter(stop => {
+                    const stopLine = (stop.line || '').toLowerCase();
+                    return stopLine.includes(line);
+                });
+
+                renderNetwork(filteredStops.length > 0 ? filteredStops : allStops, line);
             } catch (error) {
                 resultDiv.innerHTML = `
                     <div class="bg-red-50 p-6 rounded-3xl border border-red-200 text-center text-red-600 text-xs font-semibold">
-                        ❌ Could not load ${line.toUpperCase()} line stations. Please try again later!
+                        ❌ Could not load stations. Please check your connection!
                     </div>
                 `;
             }
@@ -359,5 +206,3 @@
             resultDiv.innerHTML = html;
         }
     </script>
-</body>
-</html>
