@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Luas Eco-Journey 🚋✨</title>
-    <!-- Tailwind CSS cho giao diện đẹp, hiện đại -->
+    <!-- Tailwind CSS for modern, sleek design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Quicksand (vibe tròn trịa, cute, thân thiện) -->
+    <!-- Google Fonts: Quicksand (friendly, cute, rounded vibe) -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -14,7 +14,7 @@
             background-color: #f4fbf7;
             color: #2d3748;
         }
-        /* Hiệu ứng nảy nhẹ cho mascot */
+        /* Float animation for the mascot */
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(2deg); }
@@ -22,7 +22,7 @@
         .mascot-float {
             animation: float 3s ease-in-out infinite;
         }
-        /* Thanh cuộn mềm mại */
+        /* Soft scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -45,16 +45,16 @@
                 <span class="text-3xl">🚋</span>
                 <div>
                     <h1 class="font-bold text-lg text-emerald-800 leading-tight">Luas Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Di chuyển xanh - Kết nối nhanh tại Dublin 🌿</p>
+                    <p class="text-xs text-emerald-600 font-medium">Green Transit &bull; Dublin Live Data 🌿</p>
                 </div>
             </div>
             <!-- Tab Navigation -->
             <div class="flex bg-emerald-50 p-1 rounded-2xl border border-emerald-100">
                 <button onclick="switchTab('forecast')" id="tab-forecast" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm">
-                    ✨ Giờ Tàu Chạy
+                    ✨ Live Forecast
                 </button>
                 <button onclick="switchTab('network')" id="tab-network" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60">
-                    🗺️ Mạng Lưới Trạm
+                    🗺️ Network Stops
                 </button>
             </div>
         </div>
@@ -63,10 +63,10 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI / DƯỚI: MASCOT HƯỚNG DẪN XUYÊN SUỐT -->
+        <!-- LEFT / BOTTOM COLUMN: MASCOT COMPANION -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
-                <!-- Bé Tàu Mascot -->
+                <!-- Mascot Icon -->
                 <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mascot-float shadow-inner">
                     🌿🚋
                 </div>
@@ -74,79 +74,78 @@
                     Online
                 </div>
             </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Bé Tàu Xanh</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Trợ lý chuyến đi thân thiện của bạn!</p>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
+            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel assistant!</p>
             
-            <!-- Hộp thoại hướng dẫn (Speech Bubble) thay đổi theo trang -->
+            <!-- Speech Bubble -->
             <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full">
                 <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Chào bạn! Hãy chọn mã trạm bên cạnh để tớ tra cứu thời gian xe điện Luas sắp đến cho bạn nha!
+                    👋 Hello! Select or enter a stop code on the right, and I'll fetch the live Luas forecast for you right away!
                 </p>
             </div>
 
             <div class="mt-4 text-[11px] text-emerald-500 font-medium bg-emerald-50/50 px-3 py-1.5 rounded-xl w-full border border-emerald-100/60">
-                ⚡ Relay active đến 19/11/2026
+                ⚡ Relay active until Nov 19, 2026
             </div>
         </div>
 
-        <!-- CỘT PHẢI / TRÊN: NỘI DUNG CHÍNH (TAB CONTENT) -->
+        <!-- RIGHT / TOP COLUMN: CONTENT SECTIONS -->
         <div class="md:col-span-2">
             
-            <!-- TAB 1: FORECAST (TRA CỨU GIỜ TÀU) -->
+            <!-- TAB 1: FORECAST -->
             <div id="section-forecast" class="space-y-4">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
                     <h2 class="font-bold text-emerald-900 text-base mb-2 flex items-center gap-2">
-                        <span>🔍</span> Tra cứu giờ tàu trực tuyến
+                        <span>🔍</span> Live Tram Forecast
                     </h2>
-                    <p class="text-xs text-slate-500 mb-4">Nhập hoặc chọn mã trạm Luas bạn muốn kiểm tra (Ví dụ: <code class="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-bold">MYS</code> cho Mayor Square - NCI).</p>
+                    <p class="text-xs text-slate-500 mb-4">Enter or pick a Luas stop code (e.g., <code class="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-bold">MYS</code> for Mayor Square - NCI).</p>
                     
                     <div class="flex gap-2">
-                        <input type="text" id="stop-input" placeholder="Nhập mã trạm (vd: MYS, STS...)" value="MYS" class="flex-grow px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold uppercase">
+                        <input type="text" id="stop-input" placeholder="Enter stop code (e.g. MYS, STS...)" value="MYS" class="flex-grow px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold uppercase">
                         <button onclick="fetchForecast()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm flex items-center gap-1.5">
-                            <span>Tra Cứu</span> ✨
+                            <span>Search</span> ✨
                         </button>
                     </div>
 
-                    <!-- Gợi ý nhanh trạm phổ biến -->
+                    <!-- Quick Suggestions -->
                     <div class="flex flex-wrap gap-1.5 mt-3">
-                        <span class="text-xs text-slate-400 self-center mr-1">Gợi ý nhanh:</span>
+                        <span class="text-xs text-slate-400 self-center mr-1">Quick pick:</span>
                         <button onclick="quickSelect('MYS')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">Mayor Square (MYS)</button>
-                        <button onclick="quickSelect('STS')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">St. Stephen's Green (STS)</button>
-                        <button onclick="quickSelect('CPK')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">The Point (TPT)</button>
+                        <button onclick="quickSelect('STS')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">St. Stephen's (STS)</button>
+                        <button onclick="quickSelect('TPT')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-xl transition">The Point (TPT)</button>
                     </div>
                 </div>
 
-                <!-- Kết quả Forecast -->
+                <!-- Forecast Result Container -->
                 <div id="forecast-result" class="space-y-3">
-                    <!-- Nội dung kết quả hoặc màn hình chờ sẽ load ở đây -->
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-400 text-sm">
-                        Bấm "Tra Cứu" để xem lịch trình các chuyến tàu sắp tới nhé! 🚋
+                        Click "Search" to view upcoming tram schedules! 🚋
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: NETWORK (MẠNG LƯỚI TRẠM) -->
+            <!-- TAB 2: NETWORK -->
             <div id="section-network" class="hidden space-y-4">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
                     <h2 class="font-bold text-emerald-900 text-base mb-2 flex items-center gap-2">
-                        <span>🗺️</span> Danh sách hệ thống trạm Luas
+                        <span>🗺️</span> Luas Network Stops
                     </h2>
-                    <p class="text-xs text-slate-500 mb-4">Xem tất cả các trạm theo tuyến đường để chọn hành trình xanh phù hợp.</p>
+                    <p class="text-xs text-slate-500 mb-4">Explore all stations across the Red and Green lines.</p>
                     
                     <div class="flex gap-2">
                         <button onclick="fetchNetwork('red')" id="btn-red" class="flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-red-50 text-red-700 transition shadow-sm">
-                            🔴 Red Line (Tuyến Đỏ)
+                            🔴 Red Line
                         </button>
                         <button onclick="fetchNetwork('green')" id="btn-green" class="flex-1 py-2.5 rounded-2xl text-sm font-bold border border-emerald-200 bg-white text-emerald-700 transition shadow-sm">
-                            🟢 Green Line (Tuyến Xanh)
+                            🟢 Green Line
                         </button>
                     </div>
                 </div>
 
-                <!-- Danh sách trạm -->
+                <!-- Network Result Container -->
                 <div id="network-result" class="space-y-3">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-400 text-sm">
-                        Đang chọn tuyến Đỏ (Red Line). Bấm vào tab để tải danh sách trạm nha! 🌿
+                        Red Line selected. Click the tab to load stations! 🌿
                     </div>
                 </div>
             </div>
@@ -156,14 +155,14 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-6 text-xs text-emerald-600 font-medium">
-        Made with 💚 and Eco-vibe for Luas Class Relay &bull; Power by TII Data
+        Made with 💚 and Eco-vibe for Luas Class Relay &bull; Powered by TII Data
     </footer>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
 
-        // Chuyển tab giao diện
+        // Switch Tabs
         function switchTab(tab) {
             const forecastSec = document.getElementById('section-forecast');
             const networkSec = document.getElementById('section-network');
@@ -171,19 +170,18 @@
             const tabNetwork = document.getElementById('tab-network');
             const mascotSpeech = document.getElementById('mascot-speech');
 
-            if (forecast === 'forecast' || tab === 'forecast') {
+            if (tab === 'forecast') {
                 forecastSec.classList.remove('hidden');
                 networkSec.classList.add('hidden');
                 tabForecast.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm";
                 tabNetwork.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60";
-                mascotSpeech.innerText = "✨ Bạn đang ở tab tra cứu giờ tàu! Hãy nhập mã trạm (vd: MYS) để tớ kiểm tra xe điện sắp đến nhé!";
+                mascotSpeech.innerText = "✨ You are on the Live Forecast tab! Enter a stop code (e.g., MYS) and I'll check incoming trams for you!";
             } else {
                 forecastSec.classList.add('hidden');
                 networkSec.classList.remove('hidden');
                 tabNetwork.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm";
                 tabForecast.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60";
-                mascotSpeech.innerText = "🗺️ Đây là bản đồ mạng lưới tuyến đường! Tớ đã tự động tải danh sách Red Line cho bạn xem nè.";
-                // Tự động load network tuyến Red lần đầu mở tab
+                mascotSpeech.innerText = "🗺️ Welcome to the Network Map! I have automatically loaded the Red Line stations for you.";
                 fetchNetwork('red');
             }
         }
@@ -193,7 +191,7 @@
             fetchForecast();
         }
 
-        // Hiệu ứng Loading siêu dễ thương với Mascot đang chạy bộ
+        // Cute Mascot Loading Animation
         function showLoading(containerId, message) {
             document.getElementById(containerId).innerHTML = `
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center flex flex-col items-center justify-center space-y-3">
@@ -203,46 +201,46 @@
             `;
         }
 
-        // Gọi API Forecast
+        // Fetch Forecast API
         async function fetchForecast() {
             const stopCode = document.getElementById('stop-input').value.trim().toUpperCase();
             const resultDiv = document.getElementById('forecast-result');
             const mascotSpeech = document.getElementById('mascot-speech');
 
             if (!stopCode) {
-                alert('Vui lòng nhập mã trạm!');
+                alert('Please enter a valid stop code!');
                 return;
             }
 
-            showLoading('forecast-result', `Bé Tàu đang chạy đi lấy dữ liệu cho trạm [${stopCode}]...`);
-            mascotSpeech.innerText = `🔍 Tớ đang phóng như bay đến trạm ${stopCode} để hỏi giờ tàu chạy đây, đợi tớ xíu nha!`;
+            showLoading('forecast-result', `Mascot is sprinting to fetch data for stop [${stopCode}]...`);
+            mascotSpeech.innerText = `🔍 I'm rushing to stop ${stopCode} to check the tram schedule, please wait!`;
 
             try {
                 const response = await fetch(`${BASE_URL}/forecast?stop=${stopCode}`);
-                if (!response.ok) throw new Error('Không thể kết nối đến trạm relay.');
+                if (!response.ok) throw new Error('Failed to connect to the relay server.');
                 const data = await response.json();
 
                 renderForecast(data);
-                mascotSpeech.innerText = `🎉 Xong rồi! Đã cập nhật lịch trình mới nhất tại trạm ${data.stop || stopCode} cho bạn nè!`;
+                mascotSpeech.innerText = `🎉 All done! Updated schedule for ${data.stopName || data.stop || stopCode} is ready!`;
             } catch (error) {
                 resultDiv.innerHTML = `
                     <div class="bg-red-50 p-6 rounded-3xl border border-red-200 text-center text-red-600 text-xs font-semibold">
-                        ❌ Ôi không! Không thể tải dữ liệu trạm "${stopCode}". Hãy kiểm tra lại mã trạm hoặc thử lại sau nha!
+                        ❌ Oops! Could not load data for stop "${stopCode}". Please check the stop code or try again later!
                     </div>
                 `;
-                mascotSpeech.innerText = `⚠️ Hichic, có lỗi kết nối chút xíu rồi, bạn thử nhập lại mã trạm khác xem sao nhé!`;
+                mascotSpeech.innerText = `⚠️ Oh no, there was a connection hiccup. Try entering another stop code!`;
             }
         }
 
-        // Render dữ liệu Forecast lên giao diện
+        // Render Forecast Data
         function renderForecast(data) {
             const resultDiv = document.getElementById('forecast-result');
             
             let html = `
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 mb-3 flex items-center justify-between">
                     <div>
-                        <h3 class="font-bold text-emerald-900 text-base">${data.stopName || data.stop || 'Trạm Luas'}</h3>
-                        <p class="text-xs text-emerald-600 font-medium">Thời gian cập nhật: ${data.created || 'Vừa xong'}</p>
+                        <h3 class="font-bold text-emerald-900 text-base">${data.stopName || data.stop || 'Luas Stop'}</h3>
+                        <p class="text-xs text-emerald-600 font-medium">Updated: ${data.created || 'Just now'}</p>
                     </div>
                     <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Live Data 🟢</span>
                 </div>
@@ -251,7 +249,7 @@
             if (!data.directions || data.directions.length === 0) {
                 html += `
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-500 text-xs font-medium">
-                        💤 Hiện tại không có chuyến tàu nào sắp tới hoặc trạm đã đóng cửa.
+                        💤 No upcoming trams or the station is currently closed.
                     </div>
                 `;
             } else {
@@ -259,12 +257,12 @@
                     html += `
                         <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 mb-3">
                             <h4 class="font-bold text-sm text-emerald-800 mb-3 flex items-center gap-1.5">
-                                <span>🧭</span> Hướng đi: ${dir.name}
+                                <span>🧭</span> Inbound/Outbound: ${dir.name}
                             </h4>
                     `;
 
                     if (!dir.trams || dir.trams.length === 0) {
-                        html += `<p class="text-xs text-slate-400 italic">Không có thông tin chuyến tàu tiếp theo.</p>`;
+                        html += `<p class="text-xs text-slate-400 italic">No upcoming trams available for this direction.</p>`;
                     } else {
                         html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">`;
                         dir.trams.forEach(tram => {
@@ -275,12 +273,12 @@
                                         <span class="text-xl">🚋</span>
                                         <div>
                                             <p class="text-xs font-bold text-emerald-900">${tram.destination}</p>
-                                            <p class="text-[11px] text-emerald-600 font-medium">Tuyến: ${tram.line || 'Luas'}</p>
+                                            <p class="text-[11px] text-emerald-600 font-medium">Line: ${tram.line || 'Luas'}</p>
                                         </div>
                                     </div>
                                     <div class="text-right">
                                         <span class="px-2.5 py-1 rounded-xl text-xs font-bold ${isDUE ? 'bg-amber-400 text-white shadow-sm' : 'bg-emerald-200/80 text-emerald-900'}">
-                                            ${isDUE ? 'Đến ngay!' : tram.dueMins + ' phút'}
+                                            ${isDUE ? 'Due now!' : tram.dueMins + ' mins'}
                                         </span>
                                     </div>
                                 </div>
@@ -295,7 +293,7 @@
             resultDiv.innerHTML = html;
         }
 
-        // Gọi API Network (Danh sách trạm)
+        // Fetch Network API
         async function fetchNetwork(line) {
             const resultDiv = document.getElementById('network-result');
             const btnRed = document.getElementById('btn-red');
@@ -309,36 +307,36 @@
                 btnRed.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-white text-red-700 transition shadow-sm";
             }
 
-            showLoading('network-result', `Bé Tàu đang gom danh sách các trạm tuyến ${line.toUpperCase()}...`);
+            showLoading('network-result', `Mascot is gathering stations for the ${line.toUpperCase()} Line...`);
 
             try {
                 const response = await fetch(`${BASE_URL}/network?line=${line}`);
-                if (!response.ok) throw new Error('Không thể tải dữ liệu mạng lưới.');
+                if (!response.ok) throw new Error('Failed to load network data.');
                 const stops = await response.json();
 
                 renderNetwork(stops, line);
             } catch (error) {
                 resultDiv.innerHTML = `
                     <div class="bg-red-50 p-6 rounded-3xl border border-red-200 text-center text-red-600 text-xs font-semibold">
-                        ❌ Không thể tải danh sách trạm tuyến ${line}. Hãy thử lại sau nha!
+                        ❌ Could not load ${line.toUpperCase()} line stations. Please try again later!
                     </div>
                 `;
             }
         }
 
-        // Render danh sách trạm
+        // Render Network Stops
         function renderNetwork(stops, line) {
             const resultDiv = document.getElementById('network-result');
             let html = `
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-emerald-100 mb-3 flex items-center justify-between">
-                    <span class="text-xs font-bold text-emerald-900">Danh sách tuyến ${line.toUpperCase()} Line</span>
-                    <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">${stops.length || 0} trạm</span>
+                    <span class="text-xs font-bold text-emerald-900">${line.toUpperCase()} Line Stations</span>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">${stops.length || 0} stops</span>
                 </div>
                 <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
             `;
 
             if (!stops || stops.length === 0) {
-                html += `<div class="bg-white p-6 rounded-3xl text-center text-slate-400 text-xs">Không tìm thấy trạm nào.</div>`;
+                html += `<div class="bg-white p-6 rounded-3xl text-center text-slate-400 text-xs">No stops found.</div>`;
             } else {
                 stops.forEach(stop => {
                     html += `
@@ -346,12 +344,12 @@
                             <div class="flex items-center gap-2.5">
                                 <span class="text-lg">📍</span>
                                 <div>
-                                    <p class="text-xs font-bold text-emerald-900">${stop.name || stop.stopName || 'Trạm Luas'}</p>
-                                    <p class="text-[10px] text-slate-400 font-semibold">Mã: <code class="text-emerald-700 font-bold">${stop.id || stop.stop}</code></p>
+                                    <p class="text-xs font-bold text-emerald-900">${stop.name || stop.stopName || 'Luas Stop'}</p>
+                                    <p class="text-[10px] text-slate-400 font-semibold">Code: <code class="text-emerald-700 font-bold">${stop.id || stop.stop}</code></p>
                                 </div>
                             </div>
                             <button onclick="quickSelect('${stop.id || stop.stop}')" class="text-xs bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-700 font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
-                                Xem giờ tàu ✨
+                                View Forecast ✨
                             </button>
                         </div>
                     `;
