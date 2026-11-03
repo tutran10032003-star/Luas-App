@@ -1,32 +1,357 @@
-async function fetchJson(path) {
-  const url = API + path;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myLUAS - Eco Companion 🚋✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Quicksand (cute & friendly vibe) -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f4fbf7;
+            color: #2d3748;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        .mascot-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2f4ec;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-200">
 
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
+    <!-- HEADER -->
+    <header class="bg-white/85 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🚋</span>
+                <div>
+                    <h1 class="font-bold text-lg text-emerald-800 leading-tight">myLUAS Eco-Companion</h1>
+                    <p class="text-xs text-emerald-600 font-medium">Dublin Live Tram Arrivals 🌿</p>
+                </div>
+            </div>
+            <!-- Nearest Stop Button -->
+            <button onclick="findNearestStop()" id="btn-nearest" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-xl transition border border-emerald-200 flex items-center gap-1.5 shadow-sm">
+                📍 Nearest Stop
+            </button>
+        </div>
+    </header>
 
-    if (!response.ok) {
-      throw new Error(
-        `API error: ${response.status} ${response.statusText}`
-      );
-    }
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        
+        <!-- LEFT COLUMN: MASCOT COMPANION -->
+        <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
+            <div class="relative mb-3">
+                <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mascot-float shadow-inner">
+                    🌿🚋
+                </div>
+                <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                    Online
+                </div>
+            </div>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
+            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel guide!</p>
+            
+            <!-- Speech Bubble -->
+            <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full">
+                <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
+                    👋 Hello! Pick your stop from the dropdown on the right. I'll fetch the live countdown and updates for you automatically every 20s!
+                </p>
+            </div>
 
-    return await response.json();
+            <div class="mt-4 text-[11px] text-emerald-500 font-medium bg-emerald-50/50 px-3 py-1.5 rounded-xl w-full border border-emerald-100/60">
+                ⚡ Relay active &bull; Live Sync
+            </div>
+        </div>
 
-  } catch (error) {
-    console.error('Luas API error:', error);
+        <!-- RIGHT COLUMN: CONTENT & LIVE BOARD -->
+        <div class="md:col-span-2 space-y-4">
+            
+            <!-- STOP SELECTION CARD -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
+                <label for="stop-select" class="block text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">Select Your Stop</label>
+                <select id="stop-select" onchange="onStopChange()" class="w-full px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold bg-emerald-50/30 text-emerald-900">
+                    <option value="" disabled>Loading stops...</option>
+                </select>
+            </div>
 
-    if (error instanceof TypeError) {
-      throw new Error(
-        'Cannot connect to Luas API. Check CORS settings or relay availability.'
-      );
-    }
+            <!-- ERROR CONTAINER -->
+            <div id="error-container" class="hidden bg-red-50 border border-red-200 text-red-600 p-4 rounded-3xl text-xs font-semibold"></div>
 
-    throw error;
-  }
-}
+            <!-- SERVICE MESSAGE -->
+            <div id="service-message-box" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-3xl text-xs font-medium flex items-center gap-2">
+                <span>⚠️</span> <span id="service-message-text">Normal service operating.</span>
+            </div>
+
+            <!-- LIVE FORECAST BOARD -->
+            <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden">
+                <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 id="board-stop-name" class="font-bold text-base">Select a stop</h2>
+                        <p id="last-updated" class="text-[11px] text-emerald-200">Last updated: Never</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
+                        ● Live Board
+                    </span>
+                </div>
+
+                <!-- DIRECTIONS CONTAINER -->
+                <div id="directions-container" class="p-5 space-y-4">
+                    <div class="text-center text-slate-400 py-8 text-sm font-medium">
+                        Please choose a stop above to view live arrivals. 🚊
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-6 text-xs text-emerald-600 font-medium">
+        Data: Transport Infrastructure Ireland. Built by Student for BDAIB.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const BASE_URL = 'https://luas-class.kluxy.app';
+        let allStopsData = [];
+        let refreshTimer = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadStopsList();
+        });
+
+        async function loadStopsList() {
+            const selectElement = document.getElementById('stop-select');
+            try {
+                const response = await fetch(`${BASE_URL}/stops`);
+                if (!response.ok) throw new Error('Failed to fetch stops list from relay.');
+                const data = await response.json();
+                
+                allStopsData = data.stops || data;
+
+                const redStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'red');
+                const greenStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'green');
+
+                let html = '';
+                if (redStops.length > 0) {
+                    html += `<optgroup label="🔴 Red Line">`;
+                    redStops.forEach(s => {
+                        html += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+                if (greenStops.length > 0) {
+                    html += `<optgroup label="🟢 Green Line">`;
+                    greenStops.forEach(s => {
+                        html += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+                selectElement.innerHTML = html;
+
+                const savedStop = localStorage.getItem('myLuas_selectedStop');
+                const defaultStop = allStopsData.some(s => s.id === savedStop) ? savedStop : 'MYS';
+                selectElement.value = defaultStop;
+
+                fetchForecast(defaultStop);
+
+                if (refreshTimer) clearInterval(refreshTimer);
+                refreshTimer = setInterval(() => {
+                    const currentStop = selectElement.value;
+                    if (currentStop) fetchForecast(currentStop, true);
+                }, 20000);
+
+            } catch (error) {
+                showError(`Error loading stops: ${error.message}`);
+            }
+        }
+
+        function onStopChange() {
+            const stopId = document.getElementById('stop-select').value;
+            localStorage.setItem('myLuas_selectedStop', stopId);
+            fetchForecast(stopId);
+        }
+
+        async function fetchForecast(stopId, isBackground = false) {
+            hideError();
+            const mascotSpeech = document.getElementById('mascot-speech');
+            if (!isBackground) {
+                document.getElementById('directions-container').innerHTML = `
+                    <div class="text-center text-slate-400 py-8 text-sm flex flex-col items-center gap-2">
+                        <span class="text-2xl mascot-float">🏃‍♂️💨</span>
+                        <p class="font-bold text-emerald-800 text-xs">Mascot is fetching live schedule...</p>
+                    </div>
+                `;
+                mascotSpeech.innerText = `🔍 Pulling live countdown data for stop [${stopId}]!`;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/forecast?stop=${stopId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+
+                renderForecast(data);
+                
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('last-updated').innerText = `Last updated: ${now}`;
+                if (!isBackground) {
+                    mascotSpeech.innerText = `🎉 Successfully updated live arrivals for ${data.stopName || stopId}!`;
+                }
+
+            } catch (error) {
+                showError(`Failed to fetch live forecast: ${error.message}`);
+                if (!isBackground) {
+                    document.getElementById('directions-container').innerHTML = `
+                        <div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>
+                    `;
+                }
+                mascotSpeech.innerText = `⚠️ Oh no! Failed to load forecast for this stop.`;
+            }
+        }
+
+        function renderForecast(data) {
+            document.getElementById('board-stop-name').innerText = data.stopName || data.stop || 'Tram Board';
+
+            const msgBox = document.getElementById('service-message-box');
+            const msgText = document.getElementById('service-message-text');
+            if (data.message && data.message.trim() !== '' && data.message.toLowerCase() !== 'normal service operating') {
+                msgText.innerText = data.message;
+                msgBox.classList.remove('hidden');
+            } else {
+                msgBox.classList.add('hidden');
+            }
+
+            const container = document.getElementById('directions-container');
+            let html = '';
+
+            if (!data.directions || data.directions.length === 0) {
+                html = `<div class="text-center text-slate-400 py-6 text-xs">No directions available right now.</div>`;
+            } else {
+                data.directions.forEach(dir => {
+                    html += `
+                        <div class="bg-emerald-50/40 border border-emerald-100/80 p-4 rounded-2xl">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-3 flex items-center gap-1.5">
+                                <span>🧭</span> ${dir.name || dir.direction || 'Direction'}
+                            </h3>
+                    `;
+
+                    const trams = (dir.trams || []).slice(0, 3);
+
+                    if (trams.length === 0) {
+                        html += `<p class="text-xs text-slate-400 italic bg-white p-3 rounded-xl border border-emerald-100">No upcoming trams.</p>`;
+                    } else {
+                        html += `<div class="space-y-2">`;
+                        trams.forEach(tram => {
+                            const dueVal = tram.due !== undefined ? tram.due : tram.dueMins;
+                            const isDueNow = dueVal === 0 || dueVal === '0' || String(dueVal).toLowerCase() === 'due';
+                            const dest = tram.destination || tram.dest || 'Unknown';
+
+                            html += `
+                                <div class="bg-white border border-emerald-100 p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-lg">🚊</span>
+                                        <span class="font-bold text-sm text-emerald-950">${dest}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="px-3 py-1 rounded-xl text-xs font-bold ${isDueNow ? 'bg-amber-400 text-white shadow-sm' : 'bg-emerald-100 text-emerald-900'}">
+                                            ${isDueNow ? 'Due' : dueVal + ' min'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            const errBox = document.getElementById('error-container');
+            errBox.innerText = message;
+            errBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            const errBox = document.getElementById('error-container');
+            errBox.classList.add('hidden');
+        }
+
+        function findNearestStop() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            const btn = document.getElementById('btn-nearest');
+            btn.innerText = 'Locating...';
+
+            navigator.geolocation.getCurrentPosition(position => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                btn.innerText = '📍 Nearest Stop';
+
+                if (allStopsData.length === 0) {
+                    alert('Stops data not loaded yet.');
+                    return;
+                }
+
+                let closestStop = null;
+                let minDistance = Infinity;
+
+                allStopsData.forEach(stop => {
+                    if (stop.lat && stop.lng) {
+                        const dist = haversineDistance(userLat, userLon, parseFloat(stop.lat), parseFloat(stop.lng));
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestStop = stop;
+                        }
+                    }
+                });
+
+                if (closestStop) {
+                    document.getElementById('stop-select').value = closestStop.id;
+                    onStopChange();
+                    alert(`Nearest stop found: ${closestStop.name} (~${(minDistance * 1000).toFixed(0)}m away)`);
+                } else {
+                    alert('Could not determine nearest stop.');
+                }
+            }, () => {
+                btn.innerText = '📍 Nearest Stop';
+                alert('Unable to retrieve your location.');
+            });
+        }
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            function toRad(x) { return x * Math.PI / 180; }
+            const R = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+    </script>
+</body>
+</html>
