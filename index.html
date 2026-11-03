@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myLUAS - Eco Companion 🚋✨</title>
+    <title>Friendly Eco-Companion - Live Luas Tracker 🚋✨</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Quicksand (cute & friendly vibe) -->
+    <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -38,12 +38,12 @@
 
     <!-- HEADER -->
     <header class="bg-white/85 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <span class="text-3xl">🚋</span>
                 <div>
-                    <h1 class="font-bold text-lg text-emerald-800 leading-tight">myLUAS Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Dublin Live Tram Arrivals 🌿</p>
+                    <h1 class="font-bold text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
+                    <p class="text-xs text-emerald-600 font-medium">Dublin Live Tram Arrivals & Map 🌿</p>
                 </div>
             </div>
             <!-- Nearest Stop Button -->
@@ -54,34 +54,39 @@
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- LEFT COLUMN: MASCOT COMPANION -->
+        <!-- LEFT COLUMN: MASCOT & AI SEARCH -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center text-5xl mascot-float shadow-inner">
-                    🌿🚋
+                    🤖🚋
                 </div>
                 <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                    Online
+                    AI Active
                 </div>
             </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco AI Assistant</h3>
             <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel guide!</p>
             
-            <!-- Speech Bubble -->
-            <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full">
+            <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full mb-3">
                 <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Hello! Pick your stop from the dropdown on the right. I'll fetch the live countdown and updates for you automatically every 20s!
+                    👋 Hello! Type a destination below (e.g. "Tallaght" or "Mayor Square") and I'll jump straight to that station for you!
                 </p>
             </div>
 
-            <div class="mt-4 text-[11px] text-emerald-500 font-medium bg-emerald-50/50 px-3 py-1.5 rounded-xl w-full border border-emerald-100/60">
-                ⚡ Relay active &bull; Live Sync
+            <div class="w-full space-y-2">
+                <div class="relative">
+                    <input type="text" id="ai-query-input" placeholder="Ask AI destination..." class="w-full pl-3 pr-8 py-2 text-xs rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-emerald-50/30 font-semibold">
+                    <button onclick="aiFindStop()" class="absolute right-1.5 top-1.5 bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-lg text-xs">
+                        ✨
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-400 italic">Press enter or click ✨ to search</p>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: CONTENT & LIVE BOARD -->
+        <!-- RIGHT COLUMN: MAIN CONTENT (STOP SELECT + LIVE FORECAST + ROUTE MAP) -->
         <div class="md:col-span-2 space-y-4">
             
             <!-- STOP SELECTION CARD -->
@@ -112,7 +117,6 @@
                     </span>
                 </div>
 
-                <!-- DIRECTIONS CONTAINER -->
                 <div id="directions-container" class="p-5 space-y-4">
                     <div class="text-center text-slate-400 py-8 text-sm font-medium">
                         Please choose a stop above to view live arrivals. 🚊
@@ -120,11 +124,22 @@
                 </div>
             </div>
 
+            <!-- LINE ROUTE MAP (STATIONS SEQUENCE) -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
+                <h3 class="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-2">
+                    <span>🗺️</span> Line Route Map (Stations Sequence)
+                </h3>
+                <p class="text-xs text-slate-500 mb-3">Stations along the selected line in order:</p>
+                <div id="route-line-stops" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1">
+                    <span class="text-xs text-slate-400 italic">Select a stop to view route sequence...</span>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <!-- FOOTER -->
-    <footer class="text-center py-6 text-xs text-emerald-600 font-medium">
+    <footer class="text-center py-6 text-xs text-emerald-600 font-medium border-t border-emerald-100 bg-white/55">
         Data: Transport Infrastructure Ireland. Built by Student for BDAIB.
     </footer>
 
@@ -136,6 +151,12 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             await loadStopsList();
+            
+            document.getElementById('ai-query-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    aiFindStop();
+                }
+            });
         });
 
         async function loadStopsList() {
@@ -172,6 +193,7 @@
                 selectElement.value = defaultStop;
 
                 fetchForecast(defaultStop);
+                updateRouteMap(defaultStop);
 
                 if (refreshTimer) clearInterval(refreshTimer);
                 refreshTimer = setInterval(() => {
@@ -184,23 +206,65 @@
             }
         }
 
+        function aiFindStop() {
+            const query = document.getElementById('ai-query-input').value.trim().toLowerCase();
+            const speech = document.getElementById('mascot-speech');
+
+            if (!query) {
+                speech.innerText = "⚠️ Please type a stop name or keyword!";
+                return;
+            }
+
+            const matchedStop = allStopsData.find(s => s.name.toLowerCase().includes(query) || s.id.toLowerCase() === query);
+
+            if (matchedStop) {
+                document.getElementById('stop-select').value = matchedStop.id;
+                onStopChange();
+                speech.innerText = `🎉 Found it! Jumped to ${matchedStop.name}!`;
+                document.getElementById('ai-query-input').value = '';
+            } else {
+                speech.innerText = `❌ No stop found matching "${query}".`;
+            }
+        }
+
         function onStopChange() {
             const stopId = document.getElementById('stop-select').value;
             localStorage.setItem('myLuas_selectedStop', stopId);
             fetchForecast(stopId);
+            updateRouteMap(stopId);
+        }
+
+        function updateRouteMap(stopId) {
+            const container = document.getElementById('route-line-stops');
+            const currentStop = allStopsData.find(s => s.id === stopId);
+            if (!currentStop) {
+                container.innerHTML = `<span class="text-xs text-slate-400 italic">No route info available.</span>`;
+                return;
+            }
+
+            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === (currentStop.line || '').toLowerCase());
+            
+            let html = '';
+            lineStops.forEach((s, idx) => {
+                const isCurrent = s.id === stopId;
+                html += `
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-xl border ${isCurrent ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm' : 'bg-emerald-50/60 text-emerald-800 border-emerald-100'}">
+                        ${isCurrent ? '📍 ' : (idx + 1) + '. '} ${s.name}
+                    </span>
+                `;
+            });
+            container.innerHTML = html;
         }
 
         async function fetchForecast(stopId, isBackground = false) {
             hideError();
-            const mascotSpeech = document.getElementById('mascot-speech');
             if (!isBackground) {
                 document.getElementById('directions-container').innerHTML = `
                     <div class="text-center text-slate-400 py-8 text-sm flex flex-col items-center gap-2">
-                        <span class="text-2xl mascot-float">🏃‍♂️💨</span>
-                        <p class="font-bold text-emerald-800 text-xs">Mascot is fetching live schedule...</p>
+                        <span class="text-2xl mascot-float">🤖💨</span>
+                        <p class="font-bold text-emerald-800 text-xs">AI is fetching live schedule...</p>
                     </div>
                 `;
-                mascotSpeech.innerText = `🔍 Pulling live countdown data for stop [${stopId}]!`;
             }
 
             try {
@@ -212,9 +276,6 @@
                 
                 const now = new Date().toLocaleTimeString();
                 document.getElementById('last-updated').innerText = `Last updated: ${now}`;
-                if (!isBackground) {
-                    mascotSpeech.innerText = `🎉 Successfully updated live arrivals for ${data.stopName || stopId}!`;
-                }
 
             } catch (error) {
                 showError(`Failed to fetch live forecast: ${error.message}`);
@@ -223,7 +284,6 @@
                         <div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>
                     `;
                 }
-                mascotSpeech.innerText = `⚠️ Oh no! Failed to load forecast for this stop.`;
             }
         }
 
