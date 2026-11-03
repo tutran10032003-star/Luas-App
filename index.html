@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friendly Eco-Companion - Live Luas Tracker 🚋✨</title>
+    <title>Friendly Eco-Companion - Live Luas & Weather 🚋✨</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Quicksand -->
@@ -20,6 +20,14 @@
         }
         .mascot-float {
             animation: float 3s ease-in-out infinite;
+        }
+        @keyframes rain {
+            0% { transform: translateY(-10px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        .rain-drop {
+            animation: rain 1s linear infinite;
         }
         ::-webkit-scrollbar {
             width: 8px;
@@ -43,18 +51,21 @@
                 <span class="text-3xl">🚋</span>
                 <div>
                     <h1 class="font-bold text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Dublin Live Tram Arrivals & Map 🌿</p>
+                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Route Map & Weather Advisor 🌿</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- Tab Switchers -->
+                <!-- Tab Switchers (3 Tabs) -->
                 <div class="flex bg-emerald-50 p-1 rounded-2xl border border-emerald-100">
-                    <button onclick="switchTab('forecast')" id="tab-btn-forecast" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm">
-                        ✨ Live Forecast
+                    <button onclick="switchTab('forecast')" id="tab-btn-forecast" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm">
+                        ✨ Forecast
                     </button>
-                    <button onclick="switchTab('map')" id="tab-btn-map" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
-                        🗺️ Live Route Map
+                    <button onclick="switchTab('map')" id="tab-btn-map" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
+                        🗺️ Map
+                    </button>
+                    <button onclick="switchTab('weather')" id="tab-btn-weather" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
+                        🌦️ Weather & Outfit
                     </button>
                 </div>
                 <!-- Nearest Stop Button -->
@@ -68,53 +79,44 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT SVG HOẠT HÌNH CUTE + AI SEARCH -->
+        <!-- CỘT TRÁI: MASCOT ĐỔI TRẠNG THÁI THEO THỜI TIẾT + AI SEARCH -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
-                <!-- SVG Bé Tàu Xanh Lá Cầm Lá Cây Hoạt Hình Siêu Cute -->
-                <div class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden">
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <!-- Thân tàu màu xanh lá eco -->
+                <!-- Vùng chứa Mascot thay đổi theo thời tiết -->
+                <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
+                    <!-- SVG Mặc định (Nắng/Bình thường) -->
+                    <svg id="mascot-normal" width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <!-- Trần tàu trắng -->
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <!-- Kính chắn gió phía trước -->
                       <rect x="32" y="38" width="36" height="20" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <!-- Mắt long lanh -->
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
                       <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
-                      <!-- Má hồng hây hây -->
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
-                      <!-- Miệng cười cute -->
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Đèn pha -->
                       <circle cx="34" cy="66" r="3" fill="#FDE047"/>
                       <circle cx="66" cy="66" r="3" fill="#FDE047"/>
-                      <!-- Bánh xe -->
                       <circle cx="38" cy="76" r="4" fill="#334155"/>
                       <circle cx="62" cy="76" r="4" fill="#334155"/>
-                      <!-- Tay cầm chiếc lá xanh 2 bên -->
                       <path d="M15 50C10 45 18 35 25 42" stroke="#047857" stroke-width="3" stroke-linecap="round"/>
                       <path d="M22 38C18 30 28 25 28 35Z" fill="#34D399" stroke="#047857" stroke-width="2"/>
                       <path d="M85 50C90 45 82 35 75 42" stroke="#047857" stroke-width="3" stroke-linecap="round"/>
                       <path d="M78 38C82 30 72 25 72 35Z" fill="#34D399" stroke="#047857" stroke-width="2"/>
-                      <!-- Cần gạt điện phía trên -->
                       <path d="M50 25V16L60 12" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
                     </svg>
                 </div>
                 <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                    AI Active
+                    AI Weather
                 </div>
             </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Tram Mascot</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel guide!</p>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Weather Mascot</h3>
+            <p class="text-xs text-emerald-700 font-semibold mb-3">Your clothing & travel advisor!</p>
             
             <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full mb-3">
                 <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Hello! Switch between tabs or type a destination below and I'll jump straight to that station for you!
+                    👋 Hello! Check the Weather tab to see live conditions and what to wear before heading out!
                 </p>
             </div>
 
@@ -129,16 +131,18 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: NỘI DUNG 2 TAB -->
+        <!-- CỘT PHẢI: NỘI DUNG 3 TAB -->
         <div class="md:col-span-2 space-y-4">
             
             <!-- TAB 1: LIVE FORECAST -->
             <div id="tab-content-forecast" class="space-y-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100">
-                    <label for="stop-select" class="block text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">Select Your Stop</label>
-                    <select id="stop-select" onchange="onStopChange()" class="w-full px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold bg-emerald-50/30 text-emerald-900">
-                        <option value="" disabled>Loading stops...</option>
-                    </select>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex items-center justify-between">
+                    <div class="flex-grow">
+                        <label for="stop-select" class="block text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">Select Your Stop</label>
+                        <select id="stop-select" onchange="onStopChange()" class="w-full px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold bg-emerald-50/30 text-emerald-900">
+                            <option value="" disabled>Loading stops...</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="error-container" class="hidden bg-red-50 border border-red-200 text-red-600 p-4 rounded-3xl text-xs font-semibold"></div>
@@ -188,12 +192,52 @@
                 </div>
             </div>
 
+            <!-- TAB 3: WEATHER & OUTFIT ADVISOR (NEW) -->
+            <div id="tab-content-weather" class="hidden space-y-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
+                                <span>🌦️</span> Live Weather & Outfit Advisor
+                            </h3>
+                            <p class="text-xs text-slate-500">Real-time weather data at your selected stop via Open-Meteo.</p>
+                        </div>
+                        <span id="weather-stop-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Station: MYS</span>
+                    </div>
+
+                    <!-- Weather Info Card -->
+                    <div id="weather-card-body" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p id="weather-condition" class="text-lg font-bold">Loading weather...</p>
+                            <p id="weather-temp" class="text-3xl font-extrabold">--°C</p>
+                            <p id="weather-wind" class="text-xs text-emerald-100">Wind speed: -- km/h</p>
+                        </div>
+                        <div id="weather-icon-lg" class="text-6xl">🌤️</div>
+                    </div>
+
+                    <!-- Outfit & Gear Recommendations -->
+                    <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
+                        <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
+                            <span>👕</span> Recommended Clothing & Gear:
+                        </h4>
+                        <div id="outfit-recommendations" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                                <span>🧥</span> <span>Light jacket or sweater</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                                <span>🎒</span> <span>Comfortable backpack</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <!-- FOOTER -->
     <footer class="text-center py-6 text-xs text-emerald-600 font-medium border-t border-emerald-100 bg-white/55">
-        Data: Transport Infrastructure Ireland. Built by Student for BDAIB.
+        Data: Transport Infrastructure Ireland & Open-Meteo Weather. Built by Student for BDAIB.
     </footer>
 
     <!-- JAVASCRIPT LOGIC -->
@@ -216,23 +260,35 @@
         function switchTab(tabName) {
             const forecastTab = document.getElementById('tab-content-forecast');
             const mapTab = document.getElementById('tab-content-map');
+            const weatherTab = document.getElementById('tab-content-weather');
+            
             const btnForecast = document.getElementById('tab-btn-forecast');
             const btnMap = document.getElementById('tab-btn-map');
+            const btnWeather = document.getElementById('tab-btn-weather');
             const mascotSpeech = document.getElementById('mascot-speech');
+
+            forecastTab.classList.add('hidden');
+            mapTab.classList.add('hidden');
+            weatherTab.classList.add('hidden');
+
+            btnForecast.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60";
+            btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60";
+            btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60";
 
             if (tabName === 'forecast') {
                 forecastTab.classList.remove('hidden');
-                mapTab.classList.add('hidden');
                 btnForecast.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60";
                 mascotSpeech.innerText = "✨ You're viewing live tram arrivals! Select any stop to check schedule.";
-            } else {
-                forecastTab.classList.add('hidden');
+            } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                btnForecast.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60";
                 mascotSpeech.innerText = "🗺️ Here is the interactive route map! Click any station card to inspect its live data.";
                 renderVisualRouteMap(currentMapLine);
+            } else if (tabName === 'weather') {
+                weatherTab.classList.remove('hidden');
+                btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
+                mascotSpeech.innerText = "🌦️ I've analyzed the live weather at your station. Dress accordingly and have a nice trip!";
+                fetchWeatherForCurrentStop();
             }
         }
 
@@ -316,6 +372,132 @@
             document.getElementById('stop-select').value = stopId;
             onStopChange();
             switchTab('forecast');
+        }
+
+        // Tích hợp Open-Meteo Weather API theo trạm được chọn
+        async function fetchWeatherForCurrentStop() {
+            const stopId = document.getElementById('stop-select').value;
+            const currentStop = allStopsData.find(s => s.id === stopId);
+            
+            document.getElementById('weather-stop-badge').innerText = `Station: ${currentStop ? currentStop.name : stopId}`;
+
+            // Dublin mặc định lat/lng nếu trạm thiếu tọa độ
+            const lat = currentStop && currentStop.lat ? currentStop.lat : 53.3498;
+            const lon = currentStop && currentStop.lng ? currentStop.lng : -6.2603;
+
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Europe/Dublin`);
+                const weatherData = await res.json();
+                
+                if (weatherData && weatherData.current) {
+                    renderWeatherInfo(weatherData.current);
+                }
+            } catch (e) {
+                console.error("Weather fetch failed", e);
+            }
+        }
+
+        // Render thời tiết và thay đổi hình ảnh Mascot theo trời mưa/nắng
+        function renderWeatherInfo(current) {
+            const temp = current.temperature_2m;
+            const precip = current.precipitation; // lượng mưa mm
+            const wind = current.wind_speed_10m;
+            const wcode = current.weather_code;
+
+            let conditionText = "Clear & Pleasant";
+            let iconEmoji = "☀️";
+            let isRaining = precip > 0 || wcode >= 50;
+
+            if (isRaining) {
+                conditionText = "Rainy & Breezy";
+                iconEmoji = "🌧️";
+            } else if (wcode >= 1 && wcode <= 3) {
+                conditionText = "Cloudy / Overcast";
+                iconEmoji = "🌥️";
+            } else if (temp < 10) {
+                conditionText = "Chilly & Cool";
+                iconEmoji = "🧥";
+            }
+
+            document.getElementById('weather-condition').innerText = conditionText;
+            document.getElementById('weather-temp').innerText = `${temp}°C`;
+            document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h | Precipitation: ${precip} mm`;
+            document.getElementById('weather-icon-lg').innerText = iconEmoji;
+
+            // Thay đổi Mascot SVG theo thời tiết (Có ô khi mưa, không có ô khi nắng)
+            const mascotContainer = document.getElementById('mascot-container');
+            if (isRaining) {
+                mascotContainer.innerHTML = `
+                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#3B82F6" stroke="#1D4ED8" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#1D4ED8" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <path d="M47 52C47 50 53 50 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Cây ô (umbrella) che mưa trên đầu -->
+                      <path d="M20 25C20 10 80 10 80 25C65 22 35 22 20 25Z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
+                      <path d="M50 25V35" stroke="#334155" stroke-width="3"/>
+                      <!-- Hạt mưa rơi -->
+                      <circle cx="15" cy="40" r="1.5" fill="#60A5FA" class="rain-drop"/>
+                      <circle cx="85" cy="45" r="1.5" fill="#60A5FA" class="rain-drop"/>
+                      <circle cx="12" cy="65" r="1.5" fill="#60A5FA" class="rain-drop"/>
+                      <circle cx="88" cy="60" r="1.5" fill="#60A5FA" class="rain-drop"/>
+                    </svg>
+                `;
+                document.getElementById('mascot-speech').innerText = "🌧️ It's raining outside at your station! Don't forget to take an umbrella and wear waterproof shoes!";
+            } else {
+                mascotContainer.innerHTML = `
+                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
+                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <circle cx="34" cy="66" r="3" fill="#FDE047"/>
+                      <circle cx="66" cy="66" r="3" fill="#FDE047"/>
+                      <circle cx="38" cy="76" r="4" fill="#334155"/>
+                      <circle cx="62" cy="76" r="4" fill="#334155"/>
+                    </svg>
+                `;
+                document.getElementById('mascot-speech').innerText = "☀️ Weather looks great! Enjoy your smooth Luas journey today!";
+            }
+
+            // Gợi ý trang phục tương ứng
+            const outfitDiv = document.getElementById('outfit-recommendations');
+            if (isRaining) {
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>☂️</span> <span>Bring an umbrella or raincoat</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🥾</span> <span>Waterproof shoes or boots</span>
+                    </div>
+                `;
+            } else if (temp < 12) {
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧥</span> <span>Warm winter coat & scarf</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧤</span> <span>Gloves if needed</span>
+                    </div>
+                `;
+            } else {
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>👕</span> <span>Light sweater or casual shirt</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🕶️</span> <span>Sunglasses (nice weather!)</span>
+                    </div>
+                `;
+            }
         }
 
         function filterMapLine(line) {
