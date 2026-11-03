@@ -1,125 +1,228 @@
-<!-- JAVASCRIPT LOGIC -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myLUAS - Live Luas Tram Tracker</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-red-200">
+
+    <!-- HEADER -->
+    <header class="bg-red-600 text-white shadow-md">
+        <div class="max-w-xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="font-bold text-2xl tracking-tight">myLUAS 🚊</h1>
+                <p class="text-xs text-red-100 font-medium">Dublin Live Tram Arrivals</p>
+            </div>
+            <button onclick="findNearestStop()" id="btn-nearest" class="bg-white/10 hover:bg-white/25 text-white text-xs font-semibold px-3 py-2 rounded-xl transition border border-white/20 flex items-center gap-1">
+                📍 Nearest Stop
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-xl mx-auto px-4 py-6 flex-grow w-full space-y-4">
+        
+        <!-- STOP SELECTION CARD -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+            <label for="stop-select" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Select Your Stop</label>
+            <div class="flex gap-2">
+                <select id="stop-select" onchange="onStopChange()" class="flex-grow px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-semibold bg-slate-50">
+                    <option value="" disabled>Loading stops...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ERROR OR STATUS MESSAGE CONTAINER -->
+        <div id="error-container" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold"></div>
+
+        <!-- SERVICE MESSAGE -->
+        <div id="service-message-box" class="hidden bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs font-medium flex items-center gap-2">
+            <span>⚠️</span> <span id="service-message-text">Normal service operating.</span>
+        </div>
+
+        <!-- LIVE FORECAST BOARD -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+                <div>
+                    <h2 id="board-stop-name" class="font-bold text-base">Select a stop</h2>
+                    <p id="last-updated" class="text-[11px] text-slate-400">Last updated: Never</p>
+                </div>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    ● Live
+                </span>
+            </div>
+
+            <!-- DIRECTIONS CONTAINER -->
+            <div id="directions-container" class="p-5 space-y-5">
+                <div class="text-center text-slate-400 py-8 text-sm font-medium">
+                    Please choose a stop above to view live arrivals.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-6 text-xs text-slate-400 font-medium border-t border-slate-100 bg-white">
+        Data: Transport Infrastructure Ireland. Built by [Tên của bạn] for BDAIB.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
+        let allStopsData = [];
+        let refreshTimer = null;
 
-        // Switch Tabs
-        function switchTab(tab) {
-            const forecastSec = document.getElementById('section-forecast');
-            const networkSec = document.getElementById('section-network');
-            const tabForecast = document.getElementById('tab-forecast');
-            const tabNetwork = document.getElementById('tab-network');
-            const mascotSpeech = document.getElementById('mascot-speech');
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadStopsList();
+        });
 
-            if (tab === 'forecast') {
-                forecastSec.classList.remove('hidden');
-                networkSec.classList.add('hidden');
-                tabForecast.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm";
-                tabNetwork.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60";
-                mascotSpeech.innerText = "✨ You are on the Live Forecast tab! Enter a stop code (e.g., MYS) and I'll check incoming trams for you!";
-            } else {
-                forecastSec.classList.add('hidden');
-                networkSec.classList.remove('hidden');
-                tabNetwork.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-emerald-500 text-white shadow-sm";
-                tabForecast.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-emerald-700 hover:bg-emerald-100/60";
-                mascotSpeech.innerText = "🗺️ Welcome to the Network Map! I am fetching all stations for you.";
-                fetchAllStopsAndFilter('red');
+        // 1. Fetch Stops and Populate Grouped Dropdown
+        async function loadStopsList() {
+            const selectElement = document.getElementById('stop-select');
+            try {
+                const response = await fetch(`${BASE_URL}/stops`);
+                if (!response.ok) throw new Error('Failed to fetch stops list from relay.');
+                const data = await response.json();
+                
+                allStopsData = data.stops || data; // handle array or object wrapper
+
+                // Group stops by line
+                const redStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'red');
+                const greenStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'green');
+
+                let html = '';
+                if (redStops.length > 0) {
+                    html += `<optgroup label="Red Line">`;
+                    redStops.forEach(s => {
+                        html += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+                if (greenStops.length > 0) {
+                    html += `<optgroup label="Green Line">`;
+                    greenStops.forEach(s => {
+                        html += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+                selectElement.innerHTML = html;
+
+                // Restore choice from localStorage or default to MYS
+                const savedStop = localStorage.getItem('myLuas_selectedStop');
+                const defaultStop = allStopsData.some(s => s.id === savedStop) ? savedStop : 'MYS';
+                selectElement.value = defaultStop;
+
+                // Load initial forecast
+                fetchForecast(defaultStop);
+
+                // Setup auto-refresh every 20 seconds
+                if (refreshTimer) clearInterval(refreshTimer);
+                refreshTimer = setInterval(() => {
+                    const currentStop = selectElement.value;
+                    if (currentStop) fetchForecast(currentStop, true);
+                }, 20000);
+
+            } catch (error) {
+                showError(`Error loading stops: ${error.message}`);
             }
         }
 
-        function quickSelect(stopCode) {
-            switchTab('forecast');
-            document.getElementById('stop-input').value = stopCode;
-            fetchForecast();
+        // When user changes dropdown selection
+        function onStopChange() {
+            const stopId = document.getElementById('stop-select').value;
+            localStorage.setItem('myLuas_selectedStop', stopId);
+            fetchForecast(stopId);
         }
 
-        // Cute Mascot Loading Animation
-        function showLoading(containerId, message) {
-            document.getElementById(containerId).innerHTML = `
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 text-center flex flex-col items-center justify-center space-y-3">
-                    <div class="text-4xl mascot-float">🏃‍♂️💨</div>
-                    <p class="text-xs font-bold text-emerald-800">${message}</p>
-                </div>
-            `;
-        }
-
-        // Fetch Forecast API
-        async function fetchForecast() {
-            const stopCode = document.getElementById('stop-input').value.trim().toUpperCase();
-            const resultDiv = document.getElementById('forecast-result');
-            const mascotSpeech = document.getElementById('mascot-speech');
-
-            if (!stopCode) {
-                alert('Please enter a valid stop code!');
-                return;
+        // 2. Fetch Live Forecast for a stop
+        async function fetchForecast(stopId, isBackground = false) {
+            hideError();
+            if (!isBackground) {
+                document.getElementById('directions-container').innerHTML = `
+                    <div class="text-center text-slate-400 py-8 text-sm animate-pulse">Loading live trams...</div>
+                `;
             }
-
-            showLoading('forecast-result', `Mascot is sprinting to fetch data for stop [${stopCode}]...`);
-            mascotSpeech.innerText = `🔍 I'm rushing to stop ${stopCode} to check the tram schedule, please wait!`;
 
             try {
-                const response = await fetch(`${BASE_URL}/forecast?stop=${stopCode}`);
-                if (!response.ok) throw new Error('Failed to connect to the relay server.');
+                const response = await fetch(`${BASE_URL}/forecast?stop=${stopId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
 
                 renderForecast(data);
-                mascotSpeech.innerText = `🎉 All done! Updated schedule for ${data.stopName || data.stop || stopCode} is ready!`;
+                
+                // Update timestamp
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('last-updated').innerText = `Last updated: ${now}`;
+
             } catch (error) {
-                resultDiv.innerHTML = `
-                    <div class="bg-red-50 p-6 rounded-3xl border border-red-200 text-center text-red-600 text-xs font-semibold">
-                        ❌ Oops! Could not load data for stop "${stopCode}". Please check the stop code or try again later!
-                    </div>
-                `;
-                mascotSpeech.innerText = `⚠️ Oh no, there was a connection hiccup. Try entering another stop code!`;
+                showError(`Failed to fetch live forecast: ${error.message}`);
+                if (!isBackground) {
+                    document.getElementById('directions-container').innerHTML = `
+                        <div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>
+                    `;
+                }
             }
         }
 
-        // Render Forecast Data
+        // Render Forecast Board
         function renderForecast(data) {
-            const resultDiv = document.getElementById('forecast-result');
-            
-            let html = `
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 mb-3 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-emerald-900 text-base">${data.stopName || data.stop || 'Luas Stop'}</h3>
-                        <p class="text-xs text-emerald-600 font-medium">Updated: ${data.created || 'Just now'}</p>
-                    </div>
-                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Live Data 🟢</span>
-                </div>
-            `;
+            document.getElementById('board-stop-name').innerText = data.stopName || 'Tram Board';
+
+            // Handle service message
+            const msgBox = document.getElementById('service-message-box');
+            const msgText = document.getElementById('service-message-text');
+            if (data.message && data.message.trim() !== '' && data.message.toLowerCase() !== 'normal service operating') {
+                msgText.innerText = data.message;
+                msgBox.classList.remove('hidden');
+            } else {
+                msgBox.classList.add('hidden');
+            }
+
+            const container = document.getElementById('directions-container');
+            let html = '';
 
             if (!data.directions || data.directions.length === 0) {
-                html += `
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 text-center text-slate-500 text-xs font-medium">
-                        💤 No upcoming trams or the station is currently closed.
-                    </div>
-                `;
+                html = `<div class="text-center text-slate-400 py-6 text-xs">No directions available right now.</div>`;
             } else {
                 data.directions.forEach(dir => {
                     html += `
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 mb-3">
-                            <h4 class="font-bold text-sm text-emerald-800 mb-3 flex items-center gap-1.5">
-                                <span>🧭</span> Inbound/Outbound: ${dir.name}
-                            </h4>
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                                <span>🧭</span> ${dir.name}
+                            </h3>
                     `;
 
-                    if (!dir.trams || dir.trams.length === 0) {
-                        html += `<p class="text-xs text-slate-400 italic">No upcoming trams available for this direction.</p>`;
+                    // Slice to show max 3 trams as requested
+                    const trams = (dir.trams || []).slice(0, 3);
+
+                    if (trams.length === 0) {
+                        html += `<p class="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">No upcoming trams.</p>`;
                     } else {
-                        html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">`;
-                        dir.trams.forEach(tram => {
-                            const isDUE = tram.dueMins === 'Due' || tram.dueMins === '0';
+                        html += `<div class="space-y-2">`;
+                        trams.forEach(tram => {
+                            const isDueNow = tram.due === 0 || tram.due === '0' || String(tram.due).toLowerCase() === 'due';
                             html += `
-                                <div class="bg-emerald-50/60 border border-emerald-100 p-3 rounded-2xl flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xl">🚋</span>
-                                        <div>
-                                            <p class="text-xs font-bold text-emerald-900">${tram.destination}</p>
-                                            <p class="text-[11px] text-emerald-600 font-medium">Line: ${tram.line || 'Luas'}</p>
-                                        </div>
+                                <div class="bg-slate-50 border border-slate-100 p-3.5 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-lg">🚊</span>
+                                        <span class="font-bold text-sm text-slate-800">${tram.destination}</span>
                                     </div>
                                     <div class="text-right">
-                                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold ${isDUE ? 'bg-amber-400 text-white shadow-sm' : 'bg-emerald-200/80 text-emerald-900'}">
-                                            ${isDUE ? 'Due now!' : tram.dueMins + ' mins'}
+                                        <span class="px-3 py-1 rounded-lg text-xs font-bold ${isDueNow ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-200 text-slate-700'}">
+                                            ${isDueNow ? 'Due' : tram.due + ' min'}
                                         </span>
                                     </div>
                                 </div>
@@ -130,79 +233,78 @@
                     html += `</div>`;
                 });
             }
-
-            resultDiv.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        // Fetch All Stops via /stops and filter by line (Red/Green)
-        async function fetchAllStopsAndFilter(line) {
-            const resultDiv = document.getElementById('network-result');
-            const btnRed = document.getElementById('btn-red');
-            const btnGreen = document.getElementById('btn-green');
-
-            if (line === 'red') {
-                btnRed.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-red-50 text-red-700 transition shadow-sm";
-                btnGreen.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-emerald-200 bg-white text-emerald-700 transition shadow-sm";
-            } else {
-                btnGreen.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-emerald-200 bg-emerald-50 text-emerald-800 transition shadow-sm";
-                btnRed.className = "flex-1 py-2.5 rounded-2xl text-sm font-bold border border-red-200 bg-white text-red-700 transition shadow-sm";
-            }
-
-            showLoading('network-result', `Mascot is fetching and filtering stations for the ${line.toUpperCase()} Line...`);
-
-            try {
-                const response = await fetch(`${BASE_URL}/stops`);
-                if (!response.ok) throw new Error('Failed to load stops data.');
-                const allStops = await response.json();
-
-                // Lọc trạm dựa theo thuộc tính line hoặc tên tuyến
-                const filteredStops = allStops.filter(stop => {
-                    const stopLine = (stop.line || '').toLowerCase();
-                    return stopLine.includes(line);
-                });
-
-                renderNetwork(filteredStops.length > 0 ? filteredStops : allStops, line);
-            } catch (error) {
-                resultDiv.innerHTML = `
-                    <div class="bg-red-50 p-6 rounded-3xl border border-red-200 text-center text-red-600 text-xs font-semibold">
-                        ❌ Could not load stations. Please check your connection!
-                    </div>
-                `;
-            }
+        // Error Handlers
+        function showError(message) {
+            const errBox = document.getElementById('error-container');
+            errBox.innerText = message;
+            errBox.classList.remove('hidden');
         }
 
-        // Render Network Stops
-        function renderNetwork(stops, line) {
-            const resultDiv = document.getElementById('network-result');
-            let html = `
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-emerald-100 mb-3 flex items-center justify-between">
-                    <span class="text-xs font-bold text-emerald-900">${line.toUpperCase()} Line Stations</span>
-                    <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">${stops.length || 0} stops</span>
-                </div>
-                <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-            `;
+        function hideError() {
+            const errBox = document.getElementById('error-container');
+            errBox.classList.add('hidden');
+        }
 
-            if (!stops || stops.length === 0) {
-                html += `<div class="bg-white p-6 rounded-3xl text-center text-slate-400 text-xs">No stops found.</div>`;
-            } else {
-                stops.forEach(stop => {
-                    html += `
-                        <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between hover:border-emerald-300 transition">
-                            <div class="flex items-center gap-2.5">
-                                <span class="text-lg">📍</span>
-                                <div>
-                                    <p class="text-xs font-bold text-emerald-900">${stop.name || stop.stopName || 'Luas Stop'}</p>
-                                    <p class="text-[10px] text-slate-400 font-semibold">Code: <code class="text-emerald-700 font-bold">${stop.id || stop.stop}</code></p>
-                                </div>
-                            </div>
-                            <button onclick="quickSelect('${stop.id || stop.stop}')" class="text-xs bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-700 font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
-                                View Forecast ✨
-                            </button>
-                        </div>
-                    `;
-                });
+        // Stretch A: Nearest Stop via Geolocation & Haversine Formula
+        function findNearestStop() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
             }
-            html += `</div>`;
-            resultDiv.innerHTML = html;
+            const btn = document.getElementById('btn-nearest');
+            btn.innerText = 'Locating...';
+
+            navigator.geolocation.getCurrentPosition(position => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                btn.innerText = '📍 Nearest Stop';
+
+                if (allStopsData.length === 0) {
+                    alert('Stops data not loaded yet.');
+                    return;
+                }
+
+                let closestStop = null;
+                let minDistance = Infinity;
+
+                allStopsData.forEach(stop => {
+                    if (stop.lat && stop.lng) {
+                        const dist = haversineDistance(userLat, userLon, parseFloat(stop.lat), parseFloat(stop.lng));
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestStop = stop;
+                        }
+                    }
+                });
+
+                if (closestStop) {
+                    document.getElementById('stop-select').value = closestStop.id;
+                    onStopChange();
+                    alert(`Nearest stop found: ${closestStop.name} (~${(minDistance * 1000).toFixed(0)}m away)`);
+                } else {
+                    alert('Could not determine nearest stop.');
+                }
+            }, () => {
+                btn.innerText = '📍 Nearest Stop';
+                alert('Unable to retrieve your location.');
+            });
+        }
+
+        // Haversine formula helper
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            function toRad(x) { return x * Math.PI / 180; }
+            const R = 6371; // km
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
         }
     </script>
+</body>
+</html>
