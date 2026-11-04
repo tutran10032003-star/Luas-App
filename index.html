@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friendly Eco-Companion - Live Luas & Weather 🚋✨</title>
+    <title>Friendly Eco-Companion - Live Luas, Map & Weather 🚋✨</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS for Real Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
@@ -28,6 +32,12 @@
         }
         .rain-drop {
             animation: rain 1s linear infinite;
+        }
+        #leaflet-map {
+            height: 420px;
+            width: 100%;
+            border-radius: 1.5rem;
+            z-index: 10;
         }
         ::-webkit-scrollbar {
             width: 8px;
@@ -51,7 +61,7 @@
                 <span class="text-3xl">🚋</span>
                 <div>
                     <h1 class="font-bold text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Route Map & Weather 🌿</p>
+                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Interactive Map & Weather 🌿</p>
                 </div>
             </div>
             
@@ -62,7 +72,7 @@
                         ✨ Forecast
                     </button>
                     <button onclick="switchTab('map')" id="tab-btn-map" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
-                        🗺️ Map
+                        🗺️ Live Map
                     </button>
                     <button onclick="switchTab('weather')" id="tab-btn-weather" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
                         🌦️ Weather
@@ -79,10 +89,12 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT & AI CHAT -->
+        <!-- CỘT TRÁI: MASCOT THAY ĐỔI THEO THỜI TIẾT THỰC TẾ + AI CHAT -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
+                <!-- Vùng chứa Mascot SVG động theo thời tiết -->
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
+                    <!-- Mặc định Nắng ấm -->
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
@@ -103,11 +115,11 @@
                 </div>
             </div>
             <h3 class="font-bold text-emerald-900 text-base mb-1">Eco Weather Mascot</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly travel guide!</p>
+            <p class="text-xs text-emerald-700 font-semibold mb-3">Your clothing & travel advisor!</p>
             
             <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full mb-3">
                 <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Hello! Pick a stop or check weather tabs, I'll give you instant status updates!
+                    👋 Hello! Select any station to check live countdowns, map routes, and smart weather outfits!
                 </p>
             </div>
 
@@ -134,7 +146,7 @@
                     </select>
                 </div>
 
-                <!-- Khung trạng thái thông minh của trạm (Stop Status Bubble) -->
+                <!-- Khung chat trạng thái thông minh của trạm -->
                 <div id="stop-status-bubble" class="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl text-xs font-medium text-emerald-900 flex items-center gap-3">
                     <span class="text-2xl">🤖💬</span>
                     <div>
@@ -168,39 +180,36 @@
                 </div>
             </div>
 
-            <!-- TAB 2: LIVE ROUTE MAP -->
+            <!-- TAB 2: LIVE MAP (LEAFLET MAP HỆ THỐNG THỰC TẾ) -->
             <div id="tab-content-map" class="hidden space-y-4">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
+                    <div class="flex items-center justify-between">
                         <div>
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
-                                <span>🗺️</span> Live Route Map & Line Sequence
+                                <span>🗺️</span> Live Map & Station Route
                             </h3>
-                            <p class="text-xs text-slate-500">Click any station below to jump directly to its live forecast board!</p>
+                            <p class="text-xs text-slate-500">Real-time estimation of tram positions along Dublin map.</p>
                         </div>
-                        <div class="flex gap-1.5">
-                            <button onclick="filterMapLine('red')" id="map-btn-red" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-700 border border-red-200 transition">Red Line</button>
-                            <button onclick="filterMapLine('green')" id="map-btn-green" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-emerald-700 border border-emerald-200 transition">Green Line</button>
+                        <div class="flex gap-2">
+                            <button onclick="map.setView([53.3498, -6.2603], 13)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
                         </div>
                     </div>
-
-                    <div id="visual-route-map" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                        <span class="text-xs text-slate-400 italic">Loading map stations...</span>
-                    </div>
+                    
+                    <!-- Leaflet Map Container -->
+                    <div id="leaflet-map"></div>
                 </div>
             </div>
 
-            <!-- TAB 3: WEATHER (WITH STATION DROPDOWN) -->
+            <!-- TAB 3: WEATHER & DYNAMIC OUTFIT ADVISOR -->
             <div id="tab-content-weather" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
-                                <span>🌦️</span> Live Weather & Outfit Advisor
+                                <span>🌦️</span> Weather & Outfit Advisor
                             </h3>
-                            <p class="text-xs text-slate-500">Select any station below to check its live weather via Open-Meteo.</p>
+                            <p class="text-xs text-slate-500">Real-time weather data & tailored outfit recommendations.</p>
                         </div>
-                        <!-- Dropdown chọn trạm riêng cho tab Weather theo đúng yêu cầu -->
                         <div class="w-full sm:w-64">
                             <select id="weather-stop-select" onchange="onWeatherStopChange()" class="w-full px-3 py-2 rounded-xl border border-emerald-200 text-xs font-semibold bg-emerald-50/50 text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                                 <option value="" disabled>Select station...</option>
@@ -218,17 +227,17 @@
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
-                    <!-- Outfit Recommendations -->
+                    <!-- Dynamic Outfit Recommendations -->
                     <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
                         <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
-                            <span>👕</span> Recommended Clothing & Gear:
+                            <span>👕</span> Dynamic Outfit & Gear Recommendations:
                         </h4>
                         <div id="outfit-recommendations" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                                <span>🧥</span> <span>Light jacket or sweater</span>
+                                <span>👕</span> <span>Light sweater or casual shirt</span>
                             </div>
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                                <span>🎒</span> <span>Comfortable backpack</span>
+                                <span>🕶️</span> <span>Sunglasses & sneakers</span>
                             </div>
                         </div>
                     </div>
@@ -248,10 +257,13 @@
         const BASE_URL = 'https://luas-class.kluxy.app';
         let allStopsData = [];
         let refreshTimer = null;
-        let currentMapLine = 'red';
+        let leafletMap = null;
+        let mapMarkers = [];
+        let polylineLayer = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
             await loadStopsList();
+            initLeafletMap();
             
             document.getElementById('ai-query-input').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
@@ -285,12 +297,12 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Here is the interactive route map! Click any station card to inspect its live data.";
-                renderVisualRouteMap(currentMapLine);
+                mascotSpeech.innerText = "🗺️ Here is the interactive Dublin map showing your selected station and route!";
+                setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
                 btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🌦️ Check weather conditions and clothing advice for your selected station!";
+                mascotSpeech.innerText = "🌦️ Check weather conditions and tailored clothing advice for your selected station!";
                 fetchWeatherForStop(document.getElementById('weather-stop-select').value);
             }
         }
@@ -339,7 +351,7 @@
                 weatherSelectElement.value = defaultStop;
 
                 fetchForecast(defaultStop);
-                renderVisualRouteMap(currentMapLine);
+                fetchWeatherForStop(defaultStop);
 
                 if (refreshTimer) clearInterval(refreshTimer);
                 refreshTimer = setInterval(() => {
@@ -350,6 +362,54 @@
             } catch (error) {
                 showError(`Error loading stops: ${error.message}`);
             }
+        }
+
+        // Khởi tạo bản đồ Leaflet thực tế
+        function initLeafletMap() {
+            if (leafletMap) return;
+            leafletMap = L.map('leaflet-map').setView([53.3498, -6.2603], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+        }
+
+        function updateMapRoute(selectedStopId) {
+            if (!leafletMap || allStopsData.length === 0) return;
+
+            // Xóa markers cũ
+            mapMarkers.forEach(m => leafletMap.removeLayer(m));
+            mapMarkers = [];
+            if (polylineLayer) leafletMap.removeLayer(polylineLayer);
+
+            const selectedStop = allStopsData.find(s => s.id === selectedStopId);
+            if (!selectedStop || !selectedStop.lat || !selectedStop.lng) return;
+
+            // Lọc các trạm cùng line để vẽ đường nối tuyến
+            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === (selectedStop.line || '').toLowerCase() && s.lat && s.lng);
+            
+            const latLngs = lineStops.map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
+            
+            // Vẽ đường polyline đỏ biểu thị tuyến đường tàu chạy
+            polylineLayer = L.polyline(latLngs, {color: '#ef4444', weight: 4, opacity: 0.8}).addTo(leafletMap);
+
+            // Thêm các marker trạm lên bản đồ
+            lineStops.forEach(s => {
+                const isSelected = s.id === selectedStopId;
+                const markerColor = isSelected ? '#10b981' : '#334155';
+                const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
+                    radius: isSelected ? 8 : 5,
+                    fillColor: markerColor,
+                    color: '#fff',
+                    weight: 2,
+                    fillOpacity: 1
+                }).addTo(leafletMap);
+
+                circleMarker.bindPopup(`<b>${s.name}</b><br>Line: ${s.line}`);
+                mapMarkers.push(circleMarker);
+            });
+
+            leafletMap.setView([parseFloat(selectedStop.lat), parseFloat(selectedStop.lng)], 14);
         }
 
         function aiFindStop() {
@@ -380,7 +440,8 @@
             document.getElementById('weather-stop-select').value = stopId;
             localStorage.setItem('myLuas_selectedStop', stopId);
             fetchForecast(stopId);
-            renderVisualRouteMap(currentMapLine);
+            fetchWeatherForStop(stopId);
+            updateMapRoute(stopId);
         }
 
         function onWeatherStopChange() {
@@ -389,16 +450,10 @@
             localStorage.setItem('myLuas_selectedStop', stopId);
             fetchForecast(stopId, true);
             fetchWeatherForStop(stopId);
+            updateMapRoute(stopId);
         }
 
-        function selectStopFromMap(stopId) {
-            document.getElementById('stop-select').value = stopId;
-            document.getElementById('weather-stop-select').value = stopId;
-            onStopChange();
-            switchTab('forecast');
-        }
-
-        // Tích hợp Open-Meteo Weather API theo trạm được chọn
+        // Tích hợp Open-Meteo Weather API và cập nhật trạng thái Mascot linh hoạt
         async function fetchWeatherForStop(stopId) {
             const currentStop = allStopsData.find(s => s.id === stopId);
             const lat = currentStop && currentStop.lat ? currentStop.lat : 53.3498;
@@ -424,17 +479,24 @@
 
             let conditionText = "Clear & Pleasant";
             let iconEmoji = "☀️";
-            let isRaining = precip > 0 || wcode >= 50;
+            let weatherType = "sunny";
 
-            if (isRaining) {
-                conditionText = "Rainy & Breezy";
+            if (precip > 0 || wcode >= 50) {
+                conditionText = "Rainy & Showers";
                 iconEmoji = "🌧️";
+                weatherType = "rain";
+            } else if (wind > 25) {
+                conditionText = "Windy & Stormy";
+                iconEmoji = "💨";
+                weatherType = "windy";
             } else if (wcode >= 1 && wcode <= 3) {
                 conditionText = "Cloudy / Overcast";
                 iconEmoji = "🌥️";
+                weatherType = "cloudy";
             } else if (temp < 10) {
-                conditionText = "Chilly & Cool";
+                conditionText = "Chilly & Cold";
                 iconEmoji = "🧥";
+                weatherType = "cold";
             }
 
             document.getElementById('weather-condition').innerText = conditionText;
@@ -442,8 +504,12 @@
             document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h | Precipitation: ${precip} mm`;
             document.getElementById('weather-icon-lg').innerText = iconEmoji;
 
+            // Thay đổi diện mạo Mascot tương ứng thời tiết (Nắng, Mưa, Gió bão, Lạnh)
             const mascotContainer = document.getElementById('mascot-container');
-            if (isRaining) {
+            const mascotSpeech = document.getElementById('mascot-speech');
+            const outfitDiv = document.getElementById('outfit-recommendations');
+
+            if (weatherType === "rain") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#3B82F6" stroke="#1D4ED8" stroke-width="3"/>
@@ -454,11 +520,70 @@
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
                       <path d="M47 52C47 50 53 50 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Cây ô che mưa -->
                       <path d="M20 25C20 10 80 10 80 25C65 22 35 22 20 25Z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
                       <path d="M50 25V35" stroke="#334155" stroke-width="3"/>
                       <circle cx="15" cy="40" r="1.5" fill="#60A5FA" class="rain-drop"/>
                       <circle cx="85" cy="45" r="1.5" fill="#60A5FA" class="rain-drop"/>
                     </svg>
+                `;
+                mascotSpeech.innerText = "🌧️ It's raining right now! Grab your umbrella and wear waterproof shoes before heading out.";
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>☂️</span> <span>Compact umbrella or raincoat</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🥾</span> <span>Waterproof boots or shoes</span>
+                    </div>
+                `;
+            } else if (weatherType === "windy") {
+                mascotContainer.innerHTML = `
+                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#64748B" stroke="#334155" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#334155" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#F8FAFC" stroke="#334155" stroke-width="2"/>
+                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <path d="M45 52Q50 48 55 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Khăn choàng giữ ấm khi gió bão -->
+                      <path d="M25 60H75V68H25Z" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
+                    </svg>
+                `;
+                mascotSpeech.innerText = "💨 It's very windy and stormy outside! Wear a windbreaker jacket and secure your belongings.";
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧥</span> <span>Windbreaker or sturdy jacket</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧣</span> <span>Scarf to block cold wind</span>
+                    </div>
+                `;
+            } else if (weatherType === "cold") {
+                mascotContainer.innerHTML = `
+                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#0EA5E9" stroke="#0369A1" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0369A1" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#E0F2FE" stroke="#0369A1" stroke-width="2"/>
+                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Nón len mùa đông -->
+                      <path d="M28 35C28 20 72 20 72 35H28Z" fill="#8B5CF6" stroke="#5B21B6" stroke-width="2"/>
+                      <circle cx="50" cy="18" r="5" fill="#EC4899"/>
+                    </svg>
+                `;
+                mascotSpeech.innerText = "🧥 It's quite chilly today! Bundle up with a heavy coat and a warm beanie.";
+                outfitDiv.innerHTML = `
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧥</span> <span>Heavy winter coat or puffer jacket</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
+                        <span>🧶</span> <span>Warm beanie and gloves</span>
+                    </div>
                 `;
             } else {
                 mascotContainer.innerHTML = `
@@ -477,77 +602,16 @@
                       <circle cx="62" cy="76" r="4" fill="#334155"/>
                     </svg>
                 `;
-            }
-
-            const outfitDiv = document.getElementById('outfit-recommendations');
-            if (isRaining) {
-                outfitDiv.innerHTML = `
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>☂️</span> <span>Bring an umbrella or raincoat</span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🥾</span> <span>Waterproof shoes or boots</span>
-                    </div>
-                `;
-            } else {
+                mascotSpeech.innerText = "☀️ Weather looks wonderful! Enjoy your smooth Luas trip today.";
                 outfitDiv.innerHTML = `
                     <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
                         <span>👕</span> <span>Light sweater or casual shirt</span>
                     </div>
                     <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🕶️</span> <span>Sunglasses & comfortable sneakers</span>
+                        <span>🕶️</span> <span>Sunglasses and comfortable sneakers</span>
                     </div>
                 `;
             }
-        }
-
-        function filterMapLine(line) {
-            currentMapLine = line;
-            const btnRed = document.getElementById('map-btn-red');
-            const btnGreen = document.getElementById('map-btn-green');
-            if (line === 'red') {
-                btnRed.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-700 border border-red-200 transition";
-                btnGreen.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-emerald-700 border border-emerald-200 transition";
-            } else {
-                btnGreen.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 transition";
-                btnRed.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-red-700 border border-red-200 transition";
-            }
-            renderVisualRouteMap(line);
-        }
-
-        function renderVisualRouteMap(line) {
-            const container = document.getElementById('visual-route-map');
-            const filteredStops = allStopsData.filter(s => (s.line || '').toLowerCase() === line);
-            const currentSelectedId = document.getElementById('stop-select').value;
-
-            if (filteredStops.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-400 italic">No stations found for this line.</span>`;
-                return;
-            }
-
-            let html = `<div class="relative pl-6 space-y-3 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-1 before:bg-emerald-200">`;
-            
-            filteredStops.forEach((s, idx) => {
-                const isSelected = s.id === currentSelectedId;
-                html += `
-                    <div onclick="selectStopFromMap('${s.id}')" class="relative group cursor-pointer flex items-center justify-between p-3 rounded-2xl border transition ${isSelected ? 'bg-emerald-500 text-white border-emerald-600 shadow-md' : 'bg-white hover:bg-emerald-50/60 border-emerald-100 text-emerald-950'}">
-                        <span class="absolute -left-6 w-3 h-3 rounded-full border-2 ${isSelected ? 'bg-white border-emerald-600 scale-125' : 'bg-emerald-200 border-white'} transition"></span>
-                        
-                        <div class="flex items-center gap-2.5">
-                            <span class="text-base">🚊</span>
-                            <div>
-                                <p class="text-xs font-bold">${idx + 1}. ${s.name}</p>
-                                <p class="text-[10px] opacity-80">Stop Code: ${s.id}</p>
-                            </div>
-                        </div>
-                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-xl ${isSelected ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 group-hover:bg-emerald-200'}">
-                            View Forecast ➔
-                        </span>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
         }
 
         async function fetchForecast(stopId, isBackground = false) {
@@ -571,7 +635,6 @@
                 const now = new Date().toLocaleTimeString();
                 document.getElementById('last-updated').innerText = `Last updated: ${now}`;
 
-                // Cập nhật khung chat trạng thái thông minh cho trạm
                 const statusText = document.getElementById('stop-status-text');
                 const stopName = data.stopName || stopId;
                 statusText.innerText = `Station [${stopName}] is active. Service status: "${data.message || 'Normal'}". Next trams are syncing live!`;
