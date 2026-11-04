@@ -25,21 +25,12 @@
         .mascot-float {
             animation: float 3s ease-in-out infinite;
         }
-        @keyframes rain {
-            0% { transform: translateY(-10px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(20px); opacity: 0; }
-        }
-        .rain-drop {
-            animation: rain 1s linear infinite;
-        }
         #leaflet-map {
             height: 440px;
             width: 100%;
             border-radius: 1.5rem;
             z-index: 10;
         }
-        /* Custom Leaflet Popup Styling */
         .leaflet-popup-content-wrapper {
             border-radius: 1rem;
             padding: 4px;
@@ -95,7 +86,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT XINH XẮN THAY ĐỔI THEO THỜI TIẾT + AI CHAT -->
+        <!-- CỘT TRÁI: MASCOT LUỐN GIỮ KHUÔN MẶT CUTE RẠNG RỠ -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -103,16 +94,16 @@
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
                       <circle cx="34" cy="66" r="3" fill="#FDE047"/>
                       <circle cx="66" cy="66" r="3" fill="#FDE047"/>
-                      <circle cx="38" cy="76" r="4" fill="#334155"/>
-                      <circle cx="62" cy="76" r="4" fill="#334155"/>
                     </svg>
                 </div>
                 <div class="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
@@ -184,7 +175,7 @@
                 </div>
             </div>
 
-            <!-- TAB 2: LIVE MAP (CHẠM VÀO TRẠM HIỆN NHIỆT ĐỘ CUTE) -->
+            <!-- TAB 2: LIVE MAP -->
             <div id="tab-content-map" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
                     <div class="flex items-center justify-between">
@@ -203,7 +194,7 @@
                 </div>
             </div>
 
-            <!-- TAB 3: WEATHER & DYNAMIC OUTFIT ADVISOR -->
+            <!-- TAB 3: WEATHER & OUTFIT ADVISOR -->
             <div id="tab-content-weather" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -428,7 +419,6 @@
             }).addTo(leafletMap);
         }
 
-        // Cập nhật bản đồ và đính kèm sự kiện click hiện popup nhiệt độ thời tiết cute khi chạm vào trạm
         async function updateMapRoute(selectedStopId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -457,7 +447,6 @@
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                // Fetch trước hoặc hiển thị popup nhiệt độ khi chạm vào trạm
                 circleMarker.bindPopup(`
                     <div style="text-align: center; min-width: 140px; padding: 4px;">
                         <b style="color: #047857; font-size: 13px;">${s.name}</b>
@@ -538,7 +527,21 @@
         async function fetchWeatherForStop(stopId) {
             const currentStop = allStopsData.find(s => s.id === stopId);
             const lat = currentStop && currentStop.lat ? currentStop.lat : 53.3498;
-        // Thiết kế lại hình vẽ SVG Mascot siêu xinh, khuôn mặt luôn sáng sủa cute, mặc trang phục thời trang phù hợp
+            const lon = currentStop && currentStop.lng ? currentStop.lng : -6.2603;
+            const stopName = currentStop ? currentStop.name : stopId;
+
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Europe/Dublin`);
+                const weatherData = await res.json();
+                
+                if (weatherData && weatherData.current) {
+                    renderWeatherInfo(weatherData.current, stopName);
+                }
+            } catch (e) {
+                console.error("Weather fetch failed", e);
+            }
+        }
+
         function renderWeatherInfo(current, stopName) {
             const temp = current.temperature_2m;
             const precip = current.precipitation;
@@ -580,14 +583,11 @@
             const outfitIcon2 = document.getElementById('outfit-icon-2');
             const outfitText2 = document.getElementById('outfit-text-2');
 
-            // Cấu trúc SVG chung: Đầu tàu eco xanh lá cute luôn giữ nguyên khuôn mặt rạng rỡ, khoác thêm phụ kiện thời tiết bên dưới
             if (weatherCategory === "rain") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <!-- Thân tàu -->
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#3B82F6" stroke="#1D4ED8" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#1D4ED8" stroke-width="2"/>
-                      <!-- Kính chắn gió & Khuôn mặt luôn sáng sủa -->
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
@@ -596,7 +596,6 @@
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 53C47 55 53 55 53 53" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Mũ trùm áo mưa xinh xắn ở nóc -->
                       <path d="M20 28C20 15 80 15 80 28C65 25 35 25 20 28Z" fill="#EAB308" stroke="#A16207" stroke-width="2"/>
                     </svg>
                 `;
@@ -609,10 +608,8 @@
             } else if (weatherCategory === "freezing") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <!-- Thân tàu -->
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#0284C7" stroke="#0369A1" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0369A1" stroke-width="2"/>
-                      <!-- Kính chắn gió & Khuôn mặt -->
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#E0F2FE" stroke="#0369A1" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
@@ -621,9 +618,7 @@
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 52C47 54 53 54 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Khăn choàng cổ mùa đông ấm áp -->
                       <path d="M26 58H74V66H26Z" fill="#F97316" stroke="#C2410C" stroke-width="2"/>
-                      <!-- Nón len xinh xắn -->
                       <path d="M28 35C28 22 72 22 72 35H28Z" fill="#A855F7" stroke="#6B21A8" stroke-width="2"/>
                       <circle cx="50" cy="18" r="4" fill="#EC4899"/>
                     </svg>
@@ -637,10 +632,8 @@
             } else if (weatherCategory === "chilly") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <!-- Thân tàu màu xanh lá eco -->
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <!-- Kính chắn gió & Khuôn mặt cute luôn sáng -->
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
@@ -649,7 +642,6 @@
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Khăn choàng cổ màu pastel thanh lịch -->
                       <path d="M26 58H74V65H26Z" fill="#14B8A6" stroke="#0F766E" stroke-width="2"/>
                     </svg>
                 `;
