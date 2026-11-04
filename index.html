@@ -61,7 +61,7 @@
                 <span class="text-3xl">🚋</span>
                 <div>
                     <h1 class="font-bold text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Interactive Map & Weather 🌿</p>
+                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Interactive Map & Weather 🌿 <span id="realtime-clock" class="text-emerald-700 font-bold ml-1"></span></p>
                 </div>
             </div>
             
@@ -224,7 +224,7 @@
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
-                    <!-- Dynamic Outfit Recommendations (Shirt & Glasses slots updated dynamically) -->
+                    <!-- Dynamic Outfit Recommendations (Shirt & Glasses slots updated dynamically based on exact temperature & weather) -->
                     <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
                         <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
                             <span>👕</span> Dynamic Outfit & Gear Recommendations:
@@ -253,7 +253,6 @@
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
         let allStopsData = [
-            // Red Line Stops (Được sắp xếp đúng thứ tự tuyến đường từ Đông sang Tây)
             { id: 'TPT', name: 'The Point', line: 'red', lat: 53.3485, lng: -6.2285 },
             { id: 'SPT', name: 'Spencer Dock', line: 'red', lat: 53.3482, lng: -6.2371 },
             { id: 'MYS', name: 'Mayor Square - NCI', line: 'red', lat: 53.3512, lng: -6.2486 },
@@ -284,7 +283,6 @@
             { id: 'CHE', name: 'Cheeverstown', line: 'red', lat: 53.2815, lng: -6.4112 },
             { id: 'SAG', name: 'Saggart', line: 'red', lat: 53.2882, lng: -6.4321 },
 
-            // Green Line Stops (Được sắp xếp đúng thứ tự tuyến đường từ Bắc xuống Nam)
             { id: 'STS', name: "St. Stephen's Green", line: 'green', lat: 53.3382, lng: -6.2625 },
             { id: 'HAR', name: 'Harcourt', line: 'green', lat: 53.3335, lng: -6.2652 },
             { id: 'CHR', name: 'Charlemont', line: 'green', lat: 53.3302, lng: -6.2638 },
@@ -316,6 +314,9 @@
             populateStopsDropdowns(allStopsData);
             initLeafletMap();
 
+            // Khởi động đồng hồ thời gian thực chạy từng giây
+            startRealtimeClock();
+
             const savedStop = localStorage.getItem('myLuas_selectedStop') || 'MYS';
             document.getElementById('stop-select').value = savedStop;
             document.getElementById('weather-stop-select').value = savedStop;
@@ -333,6 +334,20 @@
                 if (e.key === 'Enter') aiFindStop();
             });
         });
+
+        // Hàm cập nhật đồng hồ thời gian thực
+        function startRealtimeClock() {
+            function updateClock() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                const clockEl = document.getElementById('realtime-clock');
+                if (clockEl) {
+                    clockEl.innerText = `| 🕒 ${timeString}`;
+                }
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
 
         function populateStopsDropdowns(stops) {
             const selectElement = document.getElementById('stop-select');
@@ -411,7 +426,6 @@
             }).addTo(leafletMap);
         }
 
-        // Vẽ đường tuyến thẳng hàng, đúng thứ tự trạm, phân biệt Red Line (đỏ) và Green Line (xanh lá)
         function updateMapRoute(selectedStopId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -505,7 +519,7 @@
             }
         }
 
-        // Cập nhật thời tiết thực tế, thay đổi linh hoạt diện mạo Mascot và thông tin Outfit (Shirt & Glasses slots)
+        // Quy chuẩn chi tiết theo nhiệt độ thực tế: < 5°C (Áo phao Puffer), 5° - 15°C (Áo len Sweater), > 15°C (Áo thun nhẹ), và có mưa/gió
         function renderWeatherInfo(current, stopName) {
             const temp = current.temperature_2m;
             const precip = current.precipitation;
@@ -514,24 +528,24 @@
 
             let conditionText = "Clear & Pleasant";
             let iconEmoji = "☀️";
-            let weatherType = "sunny";
+            let weatherCategory = "warm"; 
 
             if (precip > 0 || wcode >= 50) {
-                conditionText = "Rainy & Showers";
+                weatherCategory = "rain";
+                conditionText = "Rainy & Wet";
                 iconEmoji = "🌧️";
-                weatherType = "rain";
-            } else if (wind > 25) {
-                conditionText = "Windy & Stormy";
-                iconEmoji = "💨";
-                weatherType = "windy";
-            } else if (wcode >= 1 && wcode <= 3) {
-                conditionText = "Cloudy / Overcast";
-                iconEmoji = "🌥️";
-                weatherType = "cloudy";
-            } else if (temp < 10) {
-                conditionText = "Chilly & Cold";
+            } else if (temp < 5) {
+                weatherCategory = "freezing";
+                conditionText = "Very Cold / Freezing";
+                iconEmoji = "❄️";
+            } else if (temp >= 5 && temp <= 15) {
+                weatherCategory = "chilly";
+                conditionText = "Cool & Chilly";
                 iconEmoji = "🧥";
-                weatherType = "cold";
+            } else {
+                weatherCategory = "warm";
+                conditionText = "Mild & Pleasant";
+                iconEmoji = "☀️";
             }
 
             document.getElementById('weather-condition').innerText = conditionText;
@@ -547,7 +561,7 @@
             const outfitIcon2 = document.getElementById('outfit-icon-2');
             const outfitText2 = document.getElementById('outfit-text-2');
 
-            if (weatherType === "rain") {
+            if (weatherCategory === "rain") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#3B82F6" stroke="#1D4ED8" stroke-width="3"/>
@@ -564,36 +578,16 @@
                       <circle cx="85" cy="45" r="1.5" fill="#60A5FA" class="rain-drop"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `🌧️ It's raining at ${stopName}! Grab your raincoat and waterproof boots.`;
+                mascotSpeech.innerText = `🌧️ It's raining at ${stopName} (${temp}°C)! Don't forget your raincoat and waterproof boots.`;
                 outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Raincoat or waterproof jacket";
-                outfitIcon2.innerText = "🥾";
-                outfitText2.innerText = "Waterproof boots or sturdy shoes";
+                outfitText1.innerText = "Raincoat / Waterproof jacket";
+                outfitIcon2.innerText = "☂️";
+                outfitText2.innerText = "Sturdy umbrella & waterproof boots";
 
-            } else if (weatherType === "windy") {
+            } else if (weatherCategory === "freezing") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#64748B" stroke="#334155" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#334155" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#F8FAFC" stroke="#334155" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
-                      <path d="M45 52Q50 48 55 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M25 60H75V68H25Z" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `💨 Windy at ${stopName}! Wear a windbreaker and keep a scarf handy.`;
-                outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Windbreaker or sturdy jacket";
-                outfitIcon2.innerText = "🧣";
-                outfitText2.innerText = "Warm scarf to block cold wind";
-
-            } else if (weatherType === "cold") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#0EA5E9" stroke="#0369A1" stroke-width="3"/>
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#0284C7" stroke="#0369A1" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0369A1" stroke-width="2"/>
                       <rect x="32" y="38" width="36" height="20" rx="6" fill="#E0F2FE" stroke="#0369A1" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
@@ -601,15 +595,34 @@
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M28 35C28 20 72 20 72 35H28Z" fill="#8B5CF6" stroke="#5B21B6" stroke-width="2"/>
-                      <circle cx="50" cy="18" r="5" fill="#EC4899"/>
+                      <path d="M22 55C22 45 78 45 78 55V72H22V55Z" fill="#F97316" stroke="#C2410C" stroke-width="2"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `🧥 Chilly weather at ${stopName}! Bundle up with a heavy winter coat.`;
+                mascotSpeech.innerText = `❄️ Freezing cold at ${stopName} (${temp}°C)! Puffer jacket is a must.`;
                 outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Heavy winter coat or puffer jacket";
+                outfitText1.innerText = "Puffertech heavy down jacket";
                 outfitIcon2.innerText = "🧶";
-                outfitText2.innerText = "Warm beanie hat & cozy gloves";
+                outfitText2.innerText = "Warm woolen beanie & thermal gloves";
+
+            } else if (weatherCategory === "chilly") {
+                mascotContainer.innerHTML = `
+                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#14B8A6" stroke="#0F766E" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0F766E" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#CCFBF1" stroke="#0F766E" stroke-width="2"/>
+                      <circle cx="42" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="58" cy="46" r="4" fill="#1E293B"/>
+                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M24 55H76V72H24Z" fill="#8B5CF6" stroke="#6D28D9" stroke-width="2"/>
+                    </svg>
+                `;
+                mascotSpeech.innerText = `🧥 Chilly weather at ${stopName} (${temp}°C)! Wear a cozy wool sweater.`;
+                outfitIcon1.innerText = "🧶";
+                outfitText1.innerText = "Warm wool sweater / Cardigan";
+                outfitIcon2.innerText = "🧣";
+                outfitText2.innerText = "Light scarf & comfortable sneakers";
 
             } else {
                 mascotContainer.innerHTML = `
@@ -624,15 +637,13 @@
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
                       <circle cx="34" cy="66" r="3" fill="#FDE047"/>
                       <circle cx="66" cy="66" r="3" fill="#FDE047"/>
-                      <circle cx="38" cy="76" r="4" fill="#334155"/>
-                      <circle cx="62" cy="76" r="4" fill="#334155"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `☀️ Nice weather at ${stopName}! Enjoy your smooth Luas trip today.`;
+                mascotSpeech.innerText = `☀️ Nice warm weather at ${stopName} (${temp}°C)! Enjoy your smooth Luas trip today.`;
                 outfitIcon1.innerText = "👕";
-                outfitText1.innerText = "Light sweater or casual shirt";
+                outfitText1.innerText = "Light t-shirt or casual shirt";
                 outfitIcon2.innerText = "🕶️";
-                outfitText2.innerText = "Sunglasses and comfortable sneakers";
+                outfitText2.innerText = "Sunglasses & sneakers";
             }
         }
 
