@@ -34,10 +34,16 @@
             animation: rain 1s linear infinite;
         }
         #leaflet-map {
-            height: 420px;
+            height: 440px;
             width: 100%;
             border-radius: 1.5rem;
             z-index: 10;
+        }
+        /* Custom Leaflet Popup Styling */
+        .leaflet-popup-content-wrapper {
+            border-radius: 1rem;
+            padding: 4px;
+            font-family: 'Quicksand', sans-serif;
         }
         ::-webkit-scrollbar {
             width: 8px;
@@ -89,7 +95,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT THAY ĐỔI THEO THỜI TIẾT THỰC TẾ + AI CHAT -->
+        <!-- CỘT TRÁI: MASCOT XINH XẮN THAY ĐỔI THEO THỜI TIẾT + AI CHAT -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -133,7 +139,7 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: NỘI DUNG 3 TAB -->
+        <!-- CỘT PHẢI: NỘI DUNG TABS -->
         <div class="md:col-span-2 space-y-4">
             
             <!-- TAB 1: LIVE FORECAST -->
@@ -178,15 +184,15 @@
                 </div>
             </div>
 
-            <!-- TAB 2: LIVE MAP -->
+            <!-- TAB 2: LIVE MAP (CHẠM VÀO TRẠM HIỆN NHIỆT ĐỘ CUTE) -->
             <div id="tab-content-map" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
-                                <span>🗺️</span> Live Map & Station Route
+                                <span>🗺️</span> Interactive Dublin Map & Station Weather
                             </h3>
-                            <p class="text-xs text-slate-500">Real-time estimation of tram positions along Dublin map.</p>
+                            <p class="text-xs text-slate-500">Tap any station dot on the map to see its live weather & temperature!</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="leafletMap.setView([53.3498, -6.2603], 13)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -224,7 +230,7 @@
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
-                    <!-- Dynamic Outfit Recommendations (Shirt & Glasses slots updated dynamically based on exact temperature & weather) -->
+                    <!-- Dynamic Outfit Recommendations -->
                     <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
                         <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
                             <span>👕</span> Dynamic Outfit & Gear Recommendations:
@@ -313,8 +319,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             populateStopsDropdowns(allStopsData);
             initLeafletMap();
-
-            // Khởi động đồng hồ thời gian thực chạy từng giây
             startRealtimeClock();
 
             const savedStop = localStorage.getItem('myLuas_selectedStop') || 'MYS';
@@ -335,14 +339,12 @@
             });
         });
 
-        // Hàm cập nhật đồng hồ thời gian thực
         function startRealtimeClock() {
             function updateClock() {
                 const now = new Date();
-                const timeString = now.toLocaleTimeString();
                 const clockEl = document.getElementById('realtime-clock');
                 if (clockEl) {
-                    clockEl.innerText = `| 🕒 ${timeString}`;
+                    clockEl.innerText = `| 🕒 ${now.toLocaleTimeString()}`;
                 }
             }
             updateClock();
@@ -407,7 +409,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Here is the interactive Dublin map showing your selected station and route!";
+                mascotSpeech.innerText = "🗺️ Click any station dot on the map to inspect live weather & temperature instantly!";
                 setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
@@ -426,7 +428,8 @@
             }).addTo(leafletMap);
         }
 
-        function updateMapRoute(selectedStopId) {
+        // Cập nhật bản đồ và đính kèm sự kiện click hiện popup nhiệt độ thời tiết cute khi chạm vào trạm
+        async function updateMapRoute(selectedStopId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
             mapMarkers.forEach(m => leafletMap.removeLayer(m));
@@ -443,20 +446,50 @@
             const lineColor = lineName === 'green' ? '#10b981' : '#ef4444';
             polylineLayer = L.polyline(latLngs, {color: lineColor, weight: 5, opacity: 0.85, smoothFactor: 1}).addTo(leafletMap);
 
-            lineStops.forEach(s => {
+            for (const s of lineStops) {
                 const isSelected = s.id === selectedStopId;
                 const markerColor = isSelected ? '#3b82f6' : lineColor;
                 const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
-                    radius: isSelected ? 9 : 6,
+                    radius: isSelected ? 10 : 6,
                     fillColor: markerColor,
                     color: '#fff',
                     weight: 2,
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                circleMarker.bindPopup(`<b>${s.name}</b><br>Line: ${s.line.toUpperCase()}`);
+                // Fetch trước hoặc hiển thị popup nhiệt độ khi chạm vào trạm
+                circleMarker.bindPopup(`
+                    <div style="text-align: center; min-width: 140px; padding: 4px;">
+                        <b style="color: #047857; font-size: 13px;">${s.name}</b>
+                        <div id="popup-weather-${s.id}" style="margin-top: 6px; font-size: 12px; color: #334155;">
+                            🌡️ Loading weather...
+                        </div>
+                    </div>
+                `);
+
+                circleMarker.on('click', async () => {
+                    try {
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lng}&current=temperature_2m,precipitation,weather_code&timezone=Europe/Dublin`);
+                        const wData = await res.json();
+                        if (wData && wData.current) {
+                            const t = wData.current.temperature_2m;
+                            const p = wData.current.precipitation;
+                            const icon = p > 0 ? '🌧️' : (t < 5 ? '❄️' : (t <= 15 ? '🧥' : '☀️'));
+                            const desc = p > 0 ? 'Rainy & Wet' : (t < 5 ? 'Freezing' : (t <= 15 ? 'Cool & Chilly' : 'Sunny & Warm'));
+                            
+                            const popEl = document.getElementById(`popup-weather-${s.id}`);
+                            if (popEl) {
+                                popEl.innerHTML = `<span style="font-size: 20px;">${icon}</span><br><b>${t}°C</b> (${desc})`;
+                            }
+                        }
+                    } catch(err) {
+                        const popEl = document.getElementById(`popup-weather-${s.id}`);
+                        if (popEl) popEl.innerText = '🌡️ Weather unavailable';
+                    }
+                });
+
                 mapMarkers.push(circleMarker);
-            });
+            }
 
             leafletMap.setView([parseFloat(selectedStop.lat), parseFloat(selectedStop.lng)], 14);
         }
@@ -505,21 +538,7 @@
         async function fetchWeatherForStop(stopId) {
             const currentStop = allStopsData.find(s => s.id === stopId);
             const lat = currentStop && currentStop.lat ? currentStop.lat : 53.3498;
-            const lon = currentStop && currentStop.lng ? currentStop.lng : -6.2603;
-
-            try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Europe/Dublin`);
-                const weatherData = await res.json();
-                
-                if (weatherData && weatherData.current) {
-                    renderWeatherInfo(weatherData.current, currentStop ? currentStop.name : stopId);
-                }
-            } catch (e) {
-                console.error("Weather fetch failed", e);
-            }
-        }
-
-        // Quy chuẩn chi tiết theo nhiệt độ thực tế: < 5°C (Áo phao Puffer), 5° - 15°C (Áo len Sweater), > 15°C (Áo thun nhẹ), và có mưa/gió
+        // Thiết kế lại hình vẽ SVG Mascot siêu xinh, khuôn mặt luôn sáng sủa cute, mặc trang phục thời trang phù hợp
         function renderWeatherInfo(current, stopName) {
             const temp = current.temperature_2m;
             const precip = current.precipitation;
@@ -561,89 +580,107 @@
             const outfitIcon2 = document.getElementById('outfit-icon-2');
             const outfitText2 = document.getElementById('outfit-text-2');
 
+            // Cấu trúc SVG chung: Đầu tàu eco xanh lá cute luôn giữ nguyên khuôn mặt rạng rỡ, khoác thêm phụ kiện thời tiết bên dưới
             if (weatherCategory === "rain") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Thân tàu -->
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#3B82F6" stroke="#1D4ED8" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#1D4ED8" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+                      <!-- Kính chắn gió & Khuôn mặt luôn sáng sủa -->
+                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
-                      <path d="M47 52C47 50 53 50 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M20 25C20 10 80 10 80 25C65 22 35 22 20 25Z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
-                      <path d="M50 25V35" stroke="#334155" stroke-width="3"/>
-                      <circle cx="15" cy="40" r="1.5" fill="#60A5FA" class="rain-drop"/>
-                      <circle cx="85" cy="45" r="1.5" fill="#60A5FA" class="rain-drop"/>
+                      <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
+                      <path d="M47 53C47 55 53 55 53 53" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Mũ trùm áo mưa xinh xắn ở nóc -->
+                      <path d="M20 28C20 15 80 15 80 28C65 25 35 25 20 28Z" fill="#EAB308" stroke="#A16207" stroke-width="2"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `🌧️ It's raining at ${stopName} (${temp}°C)! Don't forget your raincoat and waterproof boots.`;
+                mascotSpeech.innerText = `🌧️ Rain at ${stopName} (${temp}°C)! Don't forget your raincoat & umbrella!`;
                 outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Raincoat / Waterproof jacket";
+                outfitText1.innerText = "Yellow Raincoat & Waterproof Jacket";
                 outfitIcon2.innerText = "☂️";
-                outfitText2.innerText = "Sturdy umbrella & waterproof boots";
+                outfitText2.innerText = "Compact Umbrella & Boots";
 
             } else if (weatherCategory === "freezing") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Thân tàu -->
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#0284C7" stroke="#0369A1" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0369A1" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#E0F2FE" stroke="#0369A1" stroke-width="2"/>
+                      <!-- Kính chắn gió & Khuôn mặt -->
+                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#E0F2FE" stroke="#0369A1" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
-                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M22 55C22 45 78 45 78 55V72H22V55Z" fill="#F97316" stroke="#C2410C" stroke-width="2"/>
+                      <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
+                      <path d="M47 52C47 54 53 54 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                      <!-- Khăn choàng cổ mùa đông ấm áp -->
+                      <path d="M26 58H74V66H26Z" fill="#F97316" stroke="#C2410C" stroke-width="2"/>
+                      <!-- Nón len xinh xắn -->
+                      <path d="M28 35C28 22 72 22 72 35H28Z" fill="#A855F7" stroke="#6B21A8" stroke-width="2"/>
+                      <circle cx="50" cy="18" r="4" fill="#EC4899"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `❄️ Freezing cold at ${stopName} (${temp}°C)! Puffer jacket is a must.`;
+                mascotSpeech.innerText = `❄️ Freezing at ${stopName} (${temp}°C)! Bundle up with a heavy Puffertech coat.`;
                 outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Puffertech heavy down jacket";
+                outfitText1.innerText = "Puffertech Down Jacket (Cực ấm)";
                 outfitIcon2.innerText = "🧶";
-                outfitText2.innerText = "Warm woolen beanie & thermal gloves";
+                outfitText2.innerText = "Warm Woolen Beanie & Thermal Gloves";
 
             } else if (weatherCategory === "chilly") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#14B8A6" stroke="#0F766E" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#0F766E" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#CCFBF1" stroke="#0F766E" stroke-width="2"/>
+                      <!-- Thân tàu màu xanh lá eco -->
+                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
+                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
+                      <!-- Kính chắn gió & Khuôn mặt cute luôn sáng -->
+                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M24 55H76V72H24Z" fill="#8B5CF6" stroke="#6D28D9" stroke-width="2"/>
+                      <!-- Khăn choàng cổ màu pastel thanh lịch -->
+                      <path d="M26 58H74V65H26Z" fill="#14B8A6" stroke="#0F766E" stroke-width="2"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `🧥 Chilly weather at ${stopName} (${temp}°C)! Wear a cozy wool sweater.`;
+                mascotSpeech.innerText = `🧥 Chilly at ${stopName} (${temp}°C)! Wear a cozy knit sweater & light scarf.`;
                 outfitIcon1.innerText = "🧶";
-                outfitText1.innerText = "Warm wool sweater / Cardigan";
+                outfitText1.innerText = "Cozy Knit Sweater / Cardigan";
                 outfitIcon2.innerText = "🧣";
-                outfitText2.innerText = "Light scarf & comfortable sneakers";
+                outfitText2.innerText = "Light Scarf & Comfortable Sneakers";
 
             } else {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="20" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
+                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
                       <circle cx="42" cy="46" r="4" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="4" fill="#1E293B"/>
-                      <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
+                      <circle cx="43.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="59.5" cy="44.5" r="1.5" fill="white"/>
+                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
+                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
                       <circle cx="34" cy="66" r="3" fill="#FDE047"/>
                       <circle cx="66" cy="66" r="3" fill="#FDE047"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = `☀️ Nice warm weather at ${stopName} (${temp}°C)! Enjoy your smooth Luas trip today.`;
+                mascotSpeech.innerText = `☀️ Pleasant weather at ${stopName} (${temp}°C)! Enjoy your smooth Luas trip today.`;
                 outfitIcon1.innerText = "👕";
-                outfitText1.innerText = "Light t-shirt or casual shirt";
+                outfitText1.innerText = "Light T-shirt or casual shirt";
                 outfitIcon2.innerText = "🕶️";
-                outfitText2.innerText = "Sunglasses & sneakers";
+                outfitText2.innerText = "Sunglasses & Sneakers";
             }
         }
 
