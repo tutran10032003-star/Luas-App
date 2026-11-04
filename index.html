@@ -191,7 +191,7 @@
                             <p class="text-xs text-slate-500">Real-time estimation of tram positions along Dublin map.</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="map.setView([53.3498, -6.2603], 13)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
+                            <button onclick="leafletMap.setView([53.3498, -6.2603], 13)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
                         </div>
                     </div>
                     
@@ -255,22 +255,139 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
-        let allStopsData = [];
+        let allStopsData = [
+            // Red Line Stops
+            { id: 'TPT', name: 'The Point', line: 'red', lat: 53.4851, lng: -6.2285 },
+            { id: 'SPT', name: 'Spencer Dock', line: 'red', lat: 53.4832, lng: -6.2371 },
+            { id: 'MYS', name: 'Mayor Square - NCI', line: 'red', lat: 53.3512, lng: -6.2486 },
+            { id: 'GDK', name: "George's Dock", line: 'red', lat: 53.3518, lng: -6.2519 },
+            { id: 'CON', name: 'Connolly', line: 'red', lat: 53.3524, lng: -6.2529 },
+            { id: 'BUS', name: 'Busáras', line: 'red', lat: 53.3508, lng: -6.2536 },
+            { id: 'ABB', name: 'Abbey Street', line: 'red', lat: 53.3486, lng: -6.2593 },
+            { id: 'JER', name: 'Jervis', line: 'red', lat: 53.3481, lng: -6.2635 },
+            { id: 'FOUR', name: 'Four Courts', line: 'red', lat: 53.3468, lng: -6.2731 },
+            { id: 'SMTH', name: 'Smithfield', line: 'red', lat: 53.3475, lng: -6.2789 },
+            { id: 'MUS', name: 'Museum', line: 'red', lat: 53.3472, lng: -6.2854 },
+            { id: 'HEU', name: 'Heuston', line: 'red', lat: 53.3473, lng: -6.2929 },
+            { id: 'JAM', name: "James's", line: 'red', lat: 53.3431, lng: -6.2995 },
+            { id: 'FAT', name: 'Fatima', line: 'red', lat: 53.3405, lng: -6.3032 },
+            { id: 'RIA', name: 'Rialto', line: 'red', lat: 53.3382, lng: -6.3072 },
+            { id: 'SUI', name: 'Suir Road', line: 'red', lat: 53.3381, lng: -6.3142 },
+            { id: 'GLD', name: 'Goldenbridge', line: 'red', lat: 53.3375, lng: -6.3204 },
+            { id: 'DRI', name: 'Drimnagh', line: 'red', lat: 53.3372, lng: -6.3262 },
+            { id: 'BLK', name: 'Blackhorse', line: 'red', lat: 53.3364, lng: -6.3315 },
+            { id: 'BLU', name: 'Bluebell', line: 'red', lat: 53.3338, lng: -6.3401 },
+            { id: 'KYL', name: 'Kylemore', line: 'red', lat: 53.3315, lng: -6.3478 },
+            { id: 'RCW', name: 'Red Cow', line: 'red', lat: 53.3228, lng: -6.3685 },
+            { id: 'KIN', name: 'Kingswood', line: 'red', lat: 53.3105, lng: -6.3752 },
+            { id: 'BEL', name: 'Belgard', line: 'red', lat: 53.2985, lng: -6.3721 },
+            { id: 'COK', name: 'Cookstown', line: 'red', lat: 53.2912, lng: -6.3758 },
+            { id: 'HOS', name: 'Hospital', line: 'red', lat: 53.2875, lng: -6.3812 },
+            { id: 'TAL', name: 'Tallaght', line: 'red', lat: 53.2852, lng: -6.3742 },
+            { id: 'CHE', name: 'Cheeverstown', line: 'red', lat: 53.2815, lng: -6.4112 },
+            { id: 'SAG', name: 'Saggart', line: 'red', lat: 53.2882, lng: -6.4321 },
+
+            // Green Line Stops
+            { id: 'STS', name: "St. Stephen's Green", line: 'green', lat: 53.3382, lng: -6.2625 },
+            { id: 'HAR', name: 'Harcourt', line: 'green', lat: 53.3335, lng: -6.2652 },
+            { id: 'CHR', name: 'Charlemont', line: 'green', lat: 53.3302, lng: -6.2638 },
+            { id: 'RAN', name: 'Ranelagh', line: 'green', lat: 53.3251, lng: -6.2592 },
+            { id: 'BEE', name: 'Beechwood', line: 'green', lat: 53.3205, lng: -6.2568 },
+            { id: 'COW', name: 'Cowper', line: 'green', lat: 53.3152, lng: -6.2562 },
+            { id: 'MIL', name: 'Milltown', line: 'green', lat: 53.3102, lng: -6.2555 },
+            { id: 'WIN', name: 'Windy Arbour', line: 'green', lat: 53.3032, lng: -6.2521 },
+            { id: 'BAL', name: 'Balally', line: 'green', lat: 53.2875, lng: -6.2435 },
+            { id: 'KIL', name: 'Kilmacud', line: 'green', lat: 53.2812, lng: -6.2392 },
+            { id: 'STI', name: 'Stillorgan', line: 'green', lat: 53.2755, lng: -6.2312 },
+            { id: 'SAN', name: 'Sandyford', line: 'green', lat: 53.2698, lng: -6.2235 },
+            { id: 'CPK', name: 'Central Park', line: 'green', lat: 53.2715, lng: -6.2112 },
+            { id: 'GLE', name: 'Glencairn', line: 'green', lat: 53.2685, lng: -6.2025 },
+            { id: 'GAL', name: 'The Gallops', line: 'green', lat: 53.2652, lng: -6.1952 },
+            { id: 'LEO', name: 'Leopardstown Valley', line: 'green', lat: 53.2615, lng: -6.1912 },
+            { id: 'BAW', name: 'Ballyogan Wood', line: 'green', lat: 53.2575, lng: -6.1882 },
+            { id: 'CAR', name: 'Carrickmines', line: 'green', lat: 53.2512, lng: -6.1752 },
+            { id: 'LAU', name: 'Laughanstown', line: 'green', lat: 53.2452, lng: -6.1685 },
+            { id: 'CHEW', name: 'Cherrywood', line: 'green', lat: 53.2415, lng: -6.1552 },
+            { id: 'BRI', name: 'Brides Glen', line: 'green', lat: 53.2382, lng: -6.1485 }
+        ];
         let refreshTimer = null;
         let leafletMap = null;
         let mapMarkers = [];
         let polylineLayer = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            await loadStopsList();
+            populateStopsDropdowns(allStopsData);
             initLeafletMap();
-            
-            document.getElementById('ai-query-input').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    aiFindStop();
+
+            const savedStop = localStorage.getItem('myLuas_selectedStop') || 'MYS';
+            document.getElementById('stop-select').value = savedStop;
+            document.getElementById('weather-stop-select').value = savedStop;
+
+            fetchForecast(savedStop);
+            fetchWeatherForStop(savedStop);
+            updateMapRoute(savedStop);
+
+            refreshTimer = setInterval(() => {
+                const currentStop = document.getElementById('stop-select').value;
+                if (currentStop) fetchForecast(currentStop, true);
+            }, 20000);
+
+            // Thử fetch API real-time từ TII nếu có mạng
+            try {
+                const response = await fetch(`${BASE_URL}/stops`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const apiStops = data.stops || data;
+                    if (Array.isArray(apiStops) && apiStops.length > 0) {
+                        // Trộn data api với lat/lng sẵn có
+                        allStopsData = apiStops.map(s => {
+                            const found = allStopsData.find(x => x.id === s.id);
+                            return { ...s, lat: found?.lat || 53.3498, lng: found?.lng || -6.2603, line: found?.line || 'red' };
+                        });
+                        populateStopsDropdowns(allStopsData);
+                    }
                 }
+            } catch (err) {
+                console.log("Using built-in fallback stations list.");
+            }
+
+            document.getElementById('ai-query-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') aiFindStop();
             });
         });
+
+        function populateStopsDropdowns(stops) {
+            const selectElement = document.getElementById('stop-select');
+            const weatherSelectElement = document.getElementById('weather-stop-select');
+
+            const redStops = stops.filter(s => (s.line || '').toLowerCase() === 'red');
+            const greenStops = stops.filter(s => (s.line || '').toLowerCase() === 'green');
+
+            let html = '';
+            let weatherHtml = '';
+            if (redStops.length > 0) {
+                html += `<optgroup label="🔴 Red Line">`;
+                weatherHtml += `<optgroup label="🔴 Red Line">`;
+                redStops.forEach(s => {
+                    html += `<option value="${s.id}">${s.name}</option>`;
+                    weatherHtml += `<option value="${s.id}">${s.name}</option>`;
+                });
+                html += `</optgroup>`;
+                weatherHtml += `</optgroup>`;
+            }
+            if (greenStops.length > 0) {
+                html += `<optgroup label="🟢 Green Line">`;
+                weatherHtml += `<optgroup label="🟢 Green Line">`;
+                greenStops.forEach(s => {
+                    html += `<option value="${s.id}">${s.name}</option>`;
+                    weatherHtml += `<option value="${s.id}">${s.name}</option>`;
+                });
+                html += `</optgroup>`;
+                weatherHtml += `</optgroup>`;
+            }
+            selectElement.innerHTML = html;
+            weatherSelectElement.innerHTML = weatherHtml;
+        }
 
         function switchTab(tabName) {
             const forecastTab = document.getElementById('tab-content-forecast');
@@ -307,64 +424,6 @@
             }
         }
 
-        async function loadStopsList() {
-            const selectElement = document.getElementById('stop-select');
-            const weatherSelectElement = document.getElementById('weather-stop-select');
-            try {
-                const response = await fetch(`${BASE_URL}/stops`);
-                if (!response.ok) throw new Error('Failed to fetch stops list from relay.');
-                const data = await response.json();
-                
-                allStopsData = data.stops || data;
-
-                const redStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'red');
-                const greenStops = allStopsData.filter(s => (s.line || '').toLowerCase() === 'green');
-
-                let html = '';
-                let weatherHtml = '';
-                if (redStops.length > 0) {
-                    html += `<optgroup label="🔴 Red Line">`;
-                    weatherHtml += `<optgroup label="🔴 Red Line">`;
-                    redStops.forEach(s => {
-                        html += `<option value="${s.id}">${s.name}</option>`;
-                        weatherHtml += `<option value="${s.id}">${s.name}</option>`;
-                    });
-                    html += `</optgroup>`;
-                    weatherHtml += `</optgroup>`;
-                }
-                if (greenStops.length > 0) {
-                    html += `<optgroup label="🟢 Green Line">`;
-                    weatherHtml += `<optgroup label="🟢 Green Line">`;
-                    greenStops.forEach(s => {
-                        html += `<option value="${s.id}">${s.name}</option>`;
-                        weatherHtml += `<option value="${s.id}">${s.name}</option>`;
-                    });
-                    html += `</optgroup>`;
-                    weatherHtml += `</optgroup>`;
-                }
-                selectElement.innerHTML = html;
-                weatherSelectElement.innerHTML = weatherHtml;
-
-                const savedStop = localStorage.getItem('myLuas_selectedStop');
-                const defaultStop = allStopsData.some(s => s.id === savedStop) ? savedStop : 'MYS';
-                selectElement.value = defaultStop;
-                weatherSelectElement.value = defaultStop;
-
-                fetchForecast(defaultStop);
-                fetchWeatherForStop(defaultStop);
-
-                if (refreshTimer) clearInterval(refreshTimer);
-                refreshTimer = setInterval(() => {
-                    const currentStop = selectElement.value;
-                    if (currentStop) fetchForecast(currentStop, true);
-                }, 20000);
-
-            } catch (error) {
-                showError(`Error loading stops: ${error.message}`);
-            }
-        }
-
-        // Khởi tạo bản đồ Leaflet thực tế
         function initLeafletMap() {
             if (leafletMap) return;
             leafletMap = L.map('leaflet-map').setView([53.3498, -6.2603], 13);
@@ -377,7 +436,6 @@
         function updateMapRoute(selectedStopId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
-            // Xóa markers cũ
             mapMarkers.forEach(m => leafletMap.removeLayer(m));
             mapMarkers = [];
             if (polylineLayer) leafletMap.removeLayer(polylineLayer);
@@ -385,15 +443,11 @@
             const selectedStop = allStopsData.find(s => s.id === selectedStopId);
             if (!selectedStop || !selectedStop.lat || !selectedStop.lng) return;
 
-            // Lọc các trạm cùng line để vẽ đường nối tuyến
             const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === (selectedStop.line || '').toLowerCase() && s.lat && s.lng);
-            
             const latLngs = lineStops.map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
             
-            // Vẽ đường polyline đỏ biểu thị tuyến đường tàu chạy
             polylineLayer = L.polyline(latLngs, {color: '#ef4444', weight: 4, opacity: 0.8}).addTo(leafletMap);
 
-            // Thêm các marker trạm lên bản đồ
             lineStops.forEach(s => {
                 const isSelected = s.id === selectedStopId;
                 const markerColor = isSelected ? '#10b981' : '#334155';
@@ -453,7 +507,6 @@
             updateMapRoute(stopId);
         }
 
-        // Tích hợp Open-Meteo Weather API và cập nhật trạng thái Mascot linh hoạt
         async function fetchWeatherForStop(stopId) {
             const currentStop = allStopsData.find(s => s.id === stopId);
             const lat = currentStop && currentStop.lat ? currentStop.lat : 53.3498;
@@ -504,7 +557,6 @@
             document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h | Precipitation: ${precip} mm`;
             document.getElementById('weather-icon-lg').innerText = iconEmoji;
 
-            // Thay đổi diện mạo Mascot tương ứng thời tiết (Nắng, Mưa, Gió bão, Lạnh)
             const mascotContainer = document.getElementById('mascot-container');
             const mascotSpeech = document.getElementById('mascot-speech');
             const outfitDiv = document.getElementById('outfit-recommendations');
@@ -520,7 +572,6 @@
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
                       <path d="M47 52C47 50 53 50 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Cây ô che mưa -->
                       <path d="M20 25C20 10 80 10 80 25C65 22 35 22 20 25Z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
                       <path d="M50 25V35" stroke="#334155" stroke-width="3"/>
                       <circle cx="15" cy="40" r="1.5" fill="#60A5FA" class="rain-drop"/>
@@ -547,7 +598,6 @@
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
                       <path d="M45 52Q50 48 55 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Khăn choàng giữ ấm khi gió bão -->
                       <path d="M25 60H75V68H25Z" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
                     </svg>
                 `;
@@ -571,7 +621,6 @@
                       <circle cx="36" cy="52" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="52" r="3" fill="#FCA5A5"/>
                       <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Nón len mùa đông -->
                       <path d="M28 35C28 20 72 20 72 35H28Z" fill="#8B5CF6" stroke="#5B21B6" stroke-width="2"/>
                       <circle cx="50" cy="18" r="5" fill="#EC4899"/>
                     </svg>
