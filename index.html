@@ -103,7 +103,6 @@
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <!-- Mắt cười híp mắt sung sướng khi nắng ấm -->
                       <path d="M39 46C39 43 45 43 45 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
                       <path d="M55 46C55 43 61 43 61 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
@@ -448,7 +447,7 @@
             }).addTo(leafletMap);
         }
 
-        async function updateMapRoute(startId, endId) {
+        function updateMapRoute(startId, endId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
             mapMarkers.forEach(m => leafletMap.removeLayer(m));
@@ -459,11 +458,11 @@
             const endStop = allStopsData.find(s => s.id === endId);
             if (!startStop || !startStop.lat || !startStop.lng) return;
 
-            const lineName = (startStop.line || 'red').toLowerCase();
-            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === lineName && s.lat && s.lng);
+            const startLine = (startStop.line || 'red').toLowerCase();
+            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === startLine && s.lat && s.lng);
             const latLngs = lineStops.map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
             
-            const lineColor = lineName === 'green' ? '#10b981' : '#ef4444';
+            const lineColor = startLine === 'green' ? '#10b981' : '#ef4444';
             polylineLayer = L.polyline(latLngs, {color: lineColor, weight: 5, opacity: 0.85, smoothFactor: 1}).addTo(leafletMap);
 
             for (const s of lineStops) {
@@ -471,23 +470,24 @@
                 const isEnd = s.id === endId;
                 let markerColor = lineColor;
                 let radiusSize = 6;
-                if (isStart) { markerColor = '#3b82f6'; radiusSize = 10; }
-                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 10; }
+                
+                if (isStart) { markerColor = '#3b82f6'; radiusSize = 11; }
+                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 11; }
 
                 const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
                     radius: radiusSize,
                     fillColor: markerColor,
                     color: '#fff',
-                    weight: 2,
+                    weight: 2.5,
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                const badge = isStart ? '<b>[Departure]</b> ' : (isEnd ? '<b>[Arrival]</b> ' : '');
+                const badge = isStart ? '<b>🔵 [Start / Departure]</b> ' : (isEnd ? '<b>🟠 [End / Arrival]</b> ' : '');
                 circleMarker.bindPopup(`
                     <div style="text-align: center; min-width: 150px; padding: 4px;">
                         ${badge}<b style="color: #047857; font-size: 13px;">${s.name}</b>
                         <div id="popup-weather-${s.id}" style="margin-top: 6px; font-size: 12px; color: #334155;">
-                            🌡️ Loading weather...
+                            🌡️ Tap to load weather...
                         </div>
                     </div>
                 `);
@@ -520,7 +520,7 @@
                 leafletMap.fitBounds([
                     [parseFloat(startStop.lat), parseFloat(startStop.lng)],
                     [parseFloat(endStop.lat), parseFloat(endStop.lng)]
-                ], { padding: [50, 50] });
+                ], { padding: [60, 60] });
             } else {
                 leafletMap.setView([parseFloat(startStop.lat), parseFloat(startStop.lng)], 14);
             }
@@ -534,7 +534,11 @@
 
             if (startStop && endStop) {
                 box.classList.remove('hidden');
-                text.innerText = `Departure: ${startStop.name} ➔ Arrival: ${endStop.name}`;
+                let lineNote = "";
+                if (startStop.line !== endStop.line) {
+                    lineNote = ` (⚠️ Note: Interchange required between ${startStop.line.toUpperCase()} and ${endStop.line.toUpperCase()} lines)`;
+                }
+                text.innerText = `Start: ${startStop.name} ➔ End: ${endStop.name}${lineNote}`;
             } else {
                 box.classList.add('hidden');
             }
@@ -659,21 +663,17 @@
             const outfitIcon2 = document.getElementById('outfit-icon-2');
             const outfitText2 = document.getElementById('outfit-text-2');
 
-            // Mascot thay đổi cảm xúc (emotion) linh hoạt: Nắng cười híp mắt sung sướng, Mưa hơi buồn mếu, Lạnh co ro, v.v.
             if (weatherCategory === "rain") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <!-- Mắt buồn khi mưa -->
                       <circle cx="42" cy="46" r="3" fill="#1E293B"/>
                       <circle cx="58" cy="46" r="3" fill="#1E293B"/>
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
                       <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <!-- Miệng mếu buồn -->
                       <path d="M46 54C46 51 54 51 54 54" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <!-- Ô che mưa -->
                       <path d="M22 26C22 14 78 14 78 26C63 24 37 24 22 26Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="2"/>
                       <path d="M50 26V36" stroke="#334155" stroke-width="2.5"/>
                     </svg>
@@ -770,7 +770,6 @@
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <!-- Mắt cười híp mắt sung sướng khi nắng ấm -->
                       <path d="M39 46C39 43 45 43 45 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
                       <path d="M55 46C55 43 61 43 61 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
                       <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
