@@ -92,9 +92,8 @@
         <!-- CỘT TRÁI: MASCOT THAY ĐỔI THEO THỜI TIẾT THỰC TẾ + AI CHAT -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
-                <!-- Vùng chứa Mascot SVG động theo thời tiết -->
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
-                    <!-- Mặc định Nắng ấm -->
+                    <!-- SVG Mặc định -->
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
@@ -146,7 +145,6 @@
                     </select>
                 </div>
 
-                <!-- Khung chat trạng thái thông minh của trạm -->
                 <div id="stop-status-bubble" class="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl text-xs font-medium text-emerald-900 flex items-center gap-3">
                     <span class="text-2xl">🤖💬</span>
                     <div>
@@ -180,7 +178,7 @@
                 </div>
             </div>
 
-            <!-- TAB 2: LIVE MAP (LEAFLET MAP HỆ THỐNG THỰC TẾ) -->
+            <!-- TAB 2: LIVE MAP -->
             <div id="tab-content-map" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
                     <div class="flex items-center justify-between">
@@ -195,7 +193,6 @@
                         </div>
                     </div>
                     
-                    <!-- Leaflet Map Container -->
                     <div id="leaflet-map"></div>
                 </div>
             </div>
@@ -227,17 +224,17 @@
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
-                    <!-- Dynamic Outfit Recommendations -->
+                    <!-- Dynamic Outfit Recommendations (Shirt & Glasses slots updated dynamically) -->
                     <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
                         <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
                             <span>👕</span> Dynamic Outfit & Gear Recommendations:
                         </h4>
                         <div id="outfit-recommendations" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                                <span>👕</span> <span>Light sweater or casual shirt</span>
+                                <span id="outfit-icon-1">🧥</span> <span id="outfit-text-1">Light sweater or casual shirt</span>
                             </div>
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                                <span>🕶️</span> <span>Sunglasses & sneakers</span>
+                                <span id="outfit-icon-2">🕶️</span> <span id="outfit-text-2">Sunglasses & sneakers</span>
                             </div>
                         </div>
                     </div>
@@ -256,9 +253,9 @@
     <script>
         const BASE_URL = 'https://luas-class.kluxy.app';
         let allStopsData = [
-            // Red Line Stops
-            { id: 'TPT', name: 'The Point', line: 'red', lat: 53.4851, lng: -6.2285 },
-            { id: 'SPT', name: 'Spencer Dock', line: 'red', lat: 53.4832, lng: -6.2371 },
+            // Red Line Stops (Được sắp xếp đúng thứ tự tuyến đường từ Đông sang Tây)
+            { id: 'TPT', name: 'The Point', line: 'red', lat: 53.3485, lng: -6.2285 },
+            { id: 'SPT', name: 'Spencer Dock', line: 'red', lat: 53.3482, lng: -6.2371 },
             { id: 'MYS', name: 'Mayor Square - NCI', line: 'red', lat: 53.3512, lng: -6.2486 },
             { id: 'GDK', name: "George's Dock", line: 'red', lat: 53.3518, lng: -6.2519 },
             { id: 'CON', name: 'Connolly', line: 'red', lat: 53.3524, lng: -6.2529 },
@@ -287,7 +284,7 @@
             { id: 'CHE', name: 'Cheeverstown', line: 'red', lat: 53.2815, lng: -6.4112 },
             { id: 'SAG', name: 'Saggart', line: 'red', lat: 53.2882, lng: -6.4321 },
 
-            // Green Line Stops
+            // Green Line Stops (Được sắp xếp đúng thứ tự tuyến đường từ Bắc xuống Nam)
             { id: 'STS', name: "St. Stephen's Green", line: 'green', lat: 53.3382, lng: -6.2625 },
             { id: 'HAR', name: 'Harcourt', line: 'green', lat: 53.3335, lng: -6.2652 },
             { id: 'CHR', name: 'Charlemont', line: 'green', lat: 53.3302, lng: -6.2638 },
@@ -331,25 +328,6 @@
                 const currentStop = document.getElementById('stop-select').value;
                 if (currentStop) fetchForecast(currentStop, true);
             }, 20000);
-
-            // Thử fetch API real-time từ TII nếu có mạng
-            try {
-                const response = await fetch(`${BASE_URL}/stops`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const apiStops = data.stops || data;
-                    if (Array.isArray(apiStops) && apiStops.length > 0) {
-                        // Trộn data api với lat/lng sẵn có
-                        allStopsData = apiStops.map(s => {
-                            const found = allStopsData.find(x => x.id === s.id);
-                            return { ...s, lat: found?.lat || 53.3498, lng: found?.lng || -6.2603, line: found?.line || 'red' };
-                        });
-                        populateStopsDropdowns(allStopsData);
-                    }
-                }
-            } catch (err) {
-                console.log("Using built-in fallback stations list.");
-            }
 
             document.getElementById('ai-query-input').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') aiFindStop();
@@ -433,6 +411,7 @@
             }).addTo(leafletMap);
         }
 
+        // Vẽ đường tuyến thẳng hàng, đúng thứ tự trạm, phân biệt Red Line (đỏ) và Green Line (xanh lá)
         function updateMapRoute(selectedStopId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -443,23 +422,25 @@
             const selectedStop = allStopsData.find(s => s.id === selectedStopId);
             if (!selectedStop || !selectedStop.lat || !selectedStop.lng) return;
 
-            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === (selectedStop.line || '').toLowerCase() && s.lat && s.lng);
+            const lineName = (selectedStop.line || 'red').toLowerCase();
+            const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === lineName && s.lat && s.lng);
             const latLngs = lineStops.map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
             
-            polylineLayer = L.polyline(latLngs, {color: '#ef4444', weight: 4, opacity: 0.8}).addTo(leafletMap);
+            const lineColor = lineName === 'green' ? '#10b981' : '#ef4444';
+            polylineLayer = L.polyline(latLngs, {color: lineColor, weight: 5, opacity: 0.85, smoothFactor: 1}).addTo(leafletMap);
 
             lineStops.forEach(s => {
                 const isSelected = s.id === selectedStopId;
-                const markerColor = isSelected ? '#10b981' : '#334155';
+                const markerColor = isSelected ? '#3b82f6' : lineColor;
                 const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
-                    radius: isSelected ? 8 : 5,
+                    radius: isSelected ? 9 : 6,
                     fillColor: markerColor,
                     color: '#fff',
                     weight: 2,
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                circleMarker.bindPopup(`<b>${s.name}</b><br>Line: ${s.line}`);
+                circleMarker.bindPopup(`<b>${s.name}</b><br>Line: ${s.line.toUpperCase()}`);
                 mapMarkers.push(circleMarker);
             });
 
@@ -517,14 +498,15 @@
                 const weatherData = await res.json();
                 
                 if (weatherData && weatherData.current) {
-                    renderWeatherInfo(weatherData.current);
+                    renderWeatherInfo(weatherData.current, currentStop ? currentStop.name : stopId);
                 }
             } catch (e) {
                 console.error("Weather fetch failed", e);
             }
         }
 
-        function renderWeatherInfo(current) {
+        // Cập nhật thời tiết thực tế, thay đổi linh hoạt diện mạo Mascot và thông tin Outfit (Shirt & Glasses slots)
+        function renderWeatherInfo(current, stopName) {
             const temp = current.temperature_2m;
             const precip = current.precipitation;
             const wind = current.wind_speed_10m;
@@ -554,12 +536,16 @@
 
             document.getElementById('weather-condition').innerText = conditionText;
             document.getElementById('weather-temp').innerText = `${temp}°C`;
-            document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h | Precipitation: ${precip} mm`;
+            document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h | Precipitation: ${precip} mm at ${stopName}`;
             document.getElementById('weather-icon-lg').innerText = iconEmoji;
 
             const mascotContainer = document.getElementById('mascot-container');
             const mascotSpeech = document.getElementById('mascot-speech');
-            const outfitDiv = document.getElementById('outfit-recommendations');
+            
+            const outfitIcon1 = document.getElementById('outfit-icon-1');
+            const outfitText1 = document.getElementById('outfit-text-1');
+            const outfitIcon2 = document.getElementById('outfit-icon-2');
+            const outfitText2 = document.getElementById('outfit-text-2');
 
             if (weatherType === "rain") {
                 mascotContainer.innerHTML = `
@@ -578,15 +564,12 @@
                       <circle cx="85" cy="45" r="1.5" fill="#60A5FA" class="rain-drop"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = "🌧️ It's raining right now! Grab your umbrella and wear waterproof shoes before heading out.";
-                outfitDiv.innerHTML = `
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>☂️</span> <span>Compact umbrella or raincoat</span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🥾</span> <span>Waterproof boots or shoes</span>
-                    </div>
-                `;
+                mascotSpeech.innerText = `🌧️ It's raining at ${stopName}! Grab your raincoat and waterproof boots.`;
+                outfitIcon1.innerText = "🧥";
+                outfitText1.innerText = "Raincoat or waterproof jacket";
+                outfitIcon2.innerText = "🥾";
+                outfitText2.innerText = "Waterproof boots or sturdy shoes";
+
             } else if (weatherType === "windy") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -601,15 +584,12 @@
                       <path d="M25 60H75V68H25Z" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = "💨 It's very windy and stormy outside! Wear a windbreaker jacket and secure your belongings.";
-                outfitDiv.innerHTML = `
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🧥</span> <span>Windbreaker or sturdy jacket</span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🧣</span> <span>Scarf to block cold wind</span>
-                    </div>
-                `;
+                mascotSpeech.innerText = `💨 Windy at ${stopName}! Wear a windbreaker and keep a scarf handy.`;
+                outfitIcon1.innerText = "🧥";
+                outfitText1.innerText = "Windbreaker or sturdy jacket";
+                outfitIcon2.innerText = "🧣";
+                outfitText2.innerText = "Warm scarf to block cold wind";
+
             } else if (weatherType === "cold") {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -625,15 +605,12 @@
                       <circle cx="50" cy="18" r="5" fill="#EC4899"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = "🧥 It's quite chilly today! Bundle up with a heavy coat and a warm beanie.";
-                outfitDiv.innerHTML = `
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🧥</span> <span>Heavy winter coat or puffer jacket</span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🧶</span> <span>Warm beanie and gloves</span>
-                    </div>
-                `;
+                mascotSpeech.innerText = `🧥 Chilly weather at ${stopName}! Bundle up with a heavy winter coat.`;
+                outfitIcon1.innerText = "🧥";
+                outfitText1.innerText = "Heavy winter coat or puffer jacket";
+                outfitIcon2.innerText = "🧶";
+                outfitText2.innerText = "Warm beanie hat & cozy gloves";
+
             } else {
                 mascotContainer.innerHTML = `
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -651,15 +628,11 @@
                       <circle cx="62" cy="76" r="4" fill="#334155"/>
                     </svg>
                 `;
-                mascotSpeech.innerText = "☀️ Weather looks wonderful! Enjoy your smooth Luas trip today.";
-                outfitDiv.innerHTML = `
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>👕</span> <span>Light sweater or casual shirt</span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2">
-                        <span>🕶️</span> <span>Sunglasses and comfortable sneakers</span>
-                    </div>
-                `;
+                mascotSpeech.innerText = `☀️ Nice weather at ${stopName}! Enjoy your smooth Luas trip today.`;
+                outfitIcon1.innerText = "👕";
+                outfitText1.innerText = "Light sweater or casual shirt";
+                outfitIcon2.innerText = "🕶️";
+                outfitText2.innerText = "Sunglasses and comfortable sneakers";
             }
         }
 
