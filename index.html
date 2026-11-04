@@ -148,13 +148,15 @@
                     </div>
                 </div>
 
-                <!-- Bảng hướng dẫn chuyển tuyến thông minh -->
-                <div id="route-summary-box" class="hidden bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 rounded-3xl shadow-sm flex items-center justify-between">
-                    <div class="space-y-1">
-                        <p class="text-xs uppercase tracking-wider font-bold text-emerald-200">Trip Planner & Interchange Guide</p>
-                        <p id="route-summary-text" class="text-sm font-extrabold">From Departure to Arrival</p>
+                <!-- Bảng hướng dẫn hành trình chi tiết từng bước -->
+                <div id="route-summary-box" class="hidden bg-white border border-emerald-200 p-4 rounded-3xl shadow-sm space-y-3">
+                    <div class="flex items-center justify-between border-b border-emerald-100 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Trip Planner & Interchange Guide</span>
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Step-by-Step</span>
                     </div>
-                    <span class="text-3xl">🚊🔄</span>
+                    <div id="route-steps-container" class="space-y-2 text-xs font-medium text-emerald-950">
+                        <!-- Step items inserted dynamically -->
+                    </div>
                 </div>
 
                 <div id="stop-status-bubble" class="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl text-xs font-medium text-emerald-900 flex items-center gap-3">
@@ -456,7 +458,6 @@
             const startLine = (startStop.line || 'red').toLowerCase();
             const endLine = (endStop && endStop.line ? endStop.line : startLine).toLowerCase();
 
-            // Vẽ trọn vẹn cả 2 tuyến Red và Green bằng nét liền mạch
             const redStops = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
             const greenStops = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
             
@@ -465,14 +466,12 @@
             polylineLayers.push(polyRed, polyGreen);
 
             if (startLine !== endLine) {
-                // Nối đoạn chuyển tuyến trung tâm (Abbey St ➔ St. Stephen's Green) bằng nét liền màu xanh dương
                 const abbey = [53.3486, -6.2593];
                 const stStephen = [53.3382, -6.2625];
-                const polyTransfer = L.polyline([abbey, stStephen], {color: '#3b82f6', weight: 4.5, opacity: 0.95}).addTo(leafletMap);
+                const polyTransfer = L.polyline([abbey, stStephen], {color: '#3b82f6', weight: 4.5, opacity: 0.95, dashArray: '5, 5'}).addTo(leafletMap);
                 polylineLayers.push(polyTransfer);
             }
 
-            // Thêm marker cho các trạm
             allStopsData.forEach(s => {
                 if (!s.lat || !s.lng) return;
                 const isStart = s.id === startId;
@@ -481,8 +480,8 @@
                 let markerColor = (s.line === 'green') ? '#10b981' : '#ef4444';
                 let radiusSize = 5;
 
-                if (isStart) { markerColor = '#ec4899'; radiusSize = 11; } // 🌸 Hồng cho Departure
-                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 11; }   // 🟠 Cam cho Arrival
+                if (isStart) { markerColor = '#ec4899'; radiusSize = 11; }
+                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 11; }
 
                 const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
                     radius: radiusSize,
@@ -492,7 +491,7 @@
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                const badge = isStart ? '<b>🌸 [Departure Station]</b><br>' : (isEnd ? '<b>🟠 [Arrival Station]</b><br>' : '');
+                const badge = isStart ? '<b>🌸 [Departure]</b><br>' : (isEnd ? '<b>🟠 [Arrival]</b><br>' : '');
                 circleMarker.bindPopup(`
                     <div style="text-align: center; min-width: 150px; padding: 4px;">
                         ${badge}<b style="color: #047857; font-size: 13px;">${s.name}</b>
@@ -550,15 +549,50 @@
             const startStop = allStopsData.find(s => s.id === startId);
             const endStop = allStopsData.find(s => s.id === endId);
             const box = document.getElementById('route-summary-box');
-            const text = document.getElementById('route-summary-text');
+            const stepsContainer = document.getElementById('route-steps-container');
 
             if (startStop && endStop) {
                 box.classList.remove('hidden');
-                let lineNote = "";
-                if (startStop.line !== endStop.line) {
-                    lineNote = ` | 🔄 Transfer Required: Interchange from ${startStop.line.toUpperCase()} Line to ${endStop.line.toUpperCase()} Line at Abbey Street / O'Connell!`;
+                let stepsHtml = '';
+
+                if (startStop.line === endStop.line) {
+                    stepsHtml = `
+                        <div class="flex items-center gap-2 p-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <span class="text-base">🚊</span>
+                            <div>
+                                <p class="font-bold text-emerald-900">Direct Journey on ${startStop.line.toUpperCase()} Line</p>
+                                <p class="text-slate-600 text-[11px]">From <b>${startStop.name}</b> directly to <b>${endStop.name}</b> without transfers.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    stepsHtml = `
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2 p-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <span class="text-base">1️⃣</span>
+                                <div>
+                                    <p class="font-bold text-emerald-900">Board ${startStop.line.toUpperCase()} Line Tram</p>
+                                    <p class="text-slate-600 text-[11px]">Depart from <b>${startStop.name}</b></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-amber-50 rounded-xl border border-amber-200">
+                                <span class="text-base">🔄</span>
+                                <div>
+                                    <p class="font-bold text-amber-900">Transfer at Abbey Street / O'Connell</p>
+                                    <p class="text-amber-700 text-[11px]">Walk briefly to switch from RED Line to GREEN Line.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-teal-50 rounded-xl border border-teal-100">
+                                <span class="text-base">2️⃣</span>
+                                <div>
+                                    <p class="font-bold text-teal-900">Board ${endStop.line.toUpperCase()} Line Tram</p>
+                                    <p class="text-slate-600 text-[11px]">Arrive at final destination <b>${endStop.name}</b></p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
-                text.innerText = `Departure: ${startStop.name} ➔ Arrival: ${endStop.name}${lineNote}`;
+                stepsContainer.innerHTML = stepsHtml;
             } else {
                 box.classList.add('hidden');
             }
