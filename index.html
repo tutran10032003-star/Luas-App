@@ -75,7 +75,7 @@
                         🌦️ Weather
                     </button>
                 </div>
-                <!-- Nearest Stop / GPS Location Button -->
+                <!-- GPS Location Button -->
                 <button onclick="findNearestStop()" id="btn-nearest" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-xl transition border border-emerald-200 flex items-center gap-1.5 shadow-sm">
                     📍 My GPS Location
                 </button>
@@ -197,7 +197,7 @@
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Dublin Map & Station Weather
                             </h3>
-                            <p class="text-xs text-slate-500">Tap any station dot on the map to see its live weather & temperature!</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Start, 🟠 Orange is End! Tap any station dot to check live weather.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -320,6 +320,7 @@
         let leafletMap = null;
         let mapMarkers = [];
         let polylineLayers = [];
+        let userGpsMarker = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
             populateStopsDropdowns(allStopsData);
@@ -420,7 +421,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Blue dot is your Start, Orange dot is your End! Tap any station dot to check live weather.";
+                mascotSpeech.innerText = "🗺️ Pink dot is Start, Orange dot is End! Tap any station dot to check live weather.";
                 setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
@@ -454,27 +455,20 @@
             const startLine = (startStop.line || 'red').toLowerCase();
             const endLine = (endStop && endStop.line ? endStop.line : startLine).toLowerCase();
 
-            // Vẽ đường đi tuyến chính hoặc tuyến chuyển tiếp
-            if (startLine === endLine) {
-                const lineStops = allStopsData.filter(s => (s.line || '').toLowerCase() === startLine && s.lat && s.lng);
-                const latLngs = lineStops.map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
-                const lineColor = startLine === 'green' ? '#10b981' : '#ef4444';
-                const polyline = L.polyline(latLngs, {color: lineColor, weight: 5, opacity: 0.85}).addTo(leafletMap);
-                polylineLayers.push(polyline);
-            } else {
-                // Khác tuyến (Interchange giữa Red và Green qua khu trung tâm Abbey St / O'Connell)
-                const redStops = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
-                const greenStops = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
-                
-                const polyRed = L.polyline(redStops, {color: '#ef4444', weight: 4, opacity: 0.8}).addTo(leafletMap);
-                const polyGreen = L.polyline(greenStops, {color: '#10b981', weight: 4, opacity: 0.8}).addTo(leafletMap);
-                
-                // Nối đường trung chuyển đi bộ
+            // Luôn vẽ đủ 2 tuyến Red và Green để dù chọn khác tuyến app vẫn show trọn vẹn đường đi
+            const redStops = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
+            const greenStops = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
+            
+            const polyRed = L.polyline(redStops, {color: '#ef4444', weight: (startLine==='red'&&endLine==='red')?6:4, opacity: 0.85}).addTo(leafletMap);
+            const polyGreen = L.polyline(greenStops, {color: '#10b981', weight: (startLine==='green'&&endLine==='green')?6:4, opacity: 0.85}).addTo(leafletMap);
+            polylineLayers.push(polyRed, polyGreen);
+
+            if (startLine !== endLine) {
+                // Nối đoạn chuyển tuyến trung tâm (Abbey St ➔ St. Stephen's Green)
                 const abbey = [53.3486, -6.2593];
                 const stStephen = [53.3382, -6.2625];
-                const polyTransfer = L.polyline([abbey, stStephen], {color: '#3b82f6', weight: 4, dashArray: '5, 10', opacity: 0.9}).addTo(leafletMap);
-
-                polylineLayers.push(polyRed, polyGreen, polyTransfer);
+                const polyTransfer = L.polyline([abbey, stStephen], {color: '#3b82f6', weight: 4, dashArray: '6, 6', opacity: 0.9}).addTo(leafletMap);
+                polylineLayers.push(polyTransfer);
             }
 
             // Thêm các marker cho toàn bộ trạm
@@ -486,18 +480,18 @@
                 let markerColor = (s.line === 'green') ? '#10b981' : '#ef4444';
                 let radiusSize = 5;
 
-                if (isStart) { markerColor = '#3b82f6'; radiusSize = 10; } // 🔵 Xanh dương cho Start
-                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 10; }   // 🟠 Cam cho End
+                if (isStart) { markerColor = '#ec4899'; radiusSize = 11; } // 🌸 Hồng/Tím cho Start
+                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 11; }   // 🟠 Cam cho End
 
                 const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
                     radius: radiusSize,
                     fillColor: markerColor,
                     color: '#fff',
-                    weight: 2,
+                    weight: 2.5,
                     fillOpacity: 1
                 }).addTo(leafletMap);
 
-                const badge = isStart ? '<b>🔵 [Start / Departure]</b><br>' : (isEnd ? '<b>🟠 [End / Arrival]</b><br>' : '');
+                const badge = isStart ? '<b>🌸 [Start Station]</b><br>' : (isEnd ? '<b>🟠 [End Station]</b><br>' : '');
                 circleMarker.bindPopup(`
                     <div style="text-align: center; min-width: 150px; padding: 4px;">
                         ${badge}<b style="color: #047857; font-size: 13px;">${s.name}</b>
@@ -569,7 +563,7 @@
             }
         }
 
-        // Định vị GPS thực tế của thiết bị
+        // Định vị GPS thiết bị và hiển thị vị trí trên Live Map
         function findNearestStop() {
             if (!navigator.geolocation) {
                 alert('Geolocation is not supported by your browser');
@@ -583,10 +577,21 @@
                 const userLon = position.coords.longitude;
                 btn.innerText = '📍 My GPS Location';
 
-                if (allStopsData.length === 0) {
-                    alert('Stops data not loaded yet.');
-                    return;
+                // Thêm marker vị trí của bồ lên bản đồ
+                if (leafletMap) {
+                    if (userGpsMarker) leafletMap.removeLayer(userGpsMarker);
+                    userGpsMarker = L.marker([userLat, userLon], {
+                        icon: L.divIcon({
+                            className: 'custom-gps-icon',
+                            html: '<div style="background:#3b82f6; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [16, 16]
+                        })
+                    }).addTo(leafletMap).bindPopup('<b>📍 You are here!</b>').openPopup();
+
+                    leafletMap.setView([userLat, userLon], 15);
                 }
+
+                if (allStopsData.length === 0) return;
 
                 let closestStop = null;
                 let minDistance = Infinity;
@@ -605,15 +610,24 @@
                     document.getElementById('stop-start-select').value = closestStop.id;
                     document.getElementById('weather-stop-select').value = closestStop.id;
                     onStartStopChange();
-                    switchTab('forecast');
-                    alert(`📍 Nearest Luas stop found from your GPS: ${closestStop.name} (~${(minDistance * 1000).toFixed(0)}m away)`);
-                } else {
-                    alert('Could not determine nearest stop.');
+                    switchTab('map'); // Chuyển thẳng sang Live Map để thấy vị trí và trạm gần nhất
+                    alert(`📍 Nearest Luas stop found: ${closestStop.name} (~${(minDistance * 1000).toFixed(0)}m away). Showing on Live Map!`);
                 }
             }, () => {
                 btn.innerText = '📍 My GPS Location';
-                alert('Unable to retrieve your location. Please check browser permissions.');
+                alert('Unable to retrieve your location. Please check browser GPS permissions.');
             });
+        }
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            function toRad(x) { return x * Math.PI / 180; }
+            const R = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
         function aiFindStop() {
