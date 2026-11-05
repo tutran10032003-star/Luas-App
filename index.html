@@ -232,7 +232,6 @@
                             <p id="weather-temp" class="text-3xl font-extrabold">--°C</p>
                             <p id="weather-wind" class="text-xs text-emerald-100">Wind speed: -- km/h</p>
                         </div>
-                        <!-- Icon thời tiết nhất quán -->
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
@@ -464,10 +463,15 @@
             polylineLayers.push(polyRed, polyGreen);
 
             if (startLine !== endLine) {
-                const abbey = [53.3486, -6.2593];
-                const stStephen = [53.3382, -6.2625];
-                // Đổi nét đứt nối tuyến sang màu cam vàng trang nhã thay vì xanh dương lộn xộn
-                const polyTransfer = L.polyline([abbey, stStephen], {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap);
+                // Tuyến đường đi bộ trung chuyển bám sát qua các tuyến phố trung tâm Dublin (Abbey Street ➔ O'Connell ➔ College Green ➔ Grafton St ➔ St. Stephen's Green)
+                const walkingTransferPath = [
+                    [53.3486, -6.2593], // Abbey Street (Red Line platform)
+                    [53.3475, -6.2590], // O'Connell Street Lower
+                    [53.3450, -6.2580], // College Green / Westmoreland St junction
+                    [53.3420, -6.2600], // Nassau St / Grafton St corner
+                    [53.3382, -6.2625]  // St. Stephen's Green (Green Line platform)
+                ];
+                const polyTransfer = L.polyline(walkingTransferPath, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap);
                 polylineLayers.push(polyTransfer);
             }
 
@@ -575,10 +579,10 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200">
-                                <span class="text-base">🔄</span>
+                                <span class="text-base">🚶‍♂️🔄</span>
                                 <div>
-                                    <p class="font-bold text-amber-900">Transfer at Abbey Street / O'Connell</p>
-                                    <p class="text-amber-700 text-[11px]">Walk briefly between RED Line and GREEN Line platforms.</p>
+                                    <p class="font-bold text-amber-900">Transfer & Walk via City Center</p>
+                                    <p class="text-amber-700 text-[11px]">Walk ~5 mins along O'Connell / Westmoreland St from RED Line (Abbey St) to GREEN Line (St. Stephen's Green).</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 p-2.5 bg-teal-50 rounded-xl border border-teal-100">
