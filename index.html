@@ -197,7 +197,7 @@
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing direct optimized travel route.</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing optimized tram route.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -205,6 +205,15 @@
                     </div>
                     
                     <div id="leaflet-map"></div>
+
+                    <!-- Map Legend Bar -->
+                    <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-[11px] font-bold text-slate-600 border-t border-emerald-100">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-pink-500 inline-block"><span></span> Departure</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Arrival Pin</div>
+                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-red-500 inline-block rounded"></span> Red Line</div>
+                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-emerald-500 inline-block rounded"></span> Green Line</div>
+                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 border-t-2 border-dashed border-amber-500 inline-block"></span> Transfer Walk</div>
+                    </div>
                 </div>
             </div>
 
@@ -486,16 +495,19 @@
                         polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
 
+                    // Real street-following pedestrian transfer path from Abbey St to O'Connell St / GPO
                     const transferCoords = [
-                        [53.3486, -6.2593],
-                        [53.3500, -6.2595]
+                        [53.3486, -6.2593], // Abbey Street (Red Line)
+                        [53.3486, -6.2600], // Walk west along Abbey St
+                        [53.3500, -6.2601], // Walk north along O'Connell St sidewalk
+                        [53.3505, -6.2602]  // O'Connell GPO / Trinity area (Green Line connection)
                     ];
-                    polylineLayers.push(L.polyline(transferCoords, {color: '#10b981', weight: 4.5, opacity: 0.95, dashArray: '5, 5'}).addTo(leafletMap));
+                    polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
 
                     const eIdx = greenStopsList.findIndex(s => s.id === endId);
                     if (eIdx !== -1) {
                         const coords2 = [
-                            [53.3500, -6.2595],
+                            [53.3505, -6.2602],
                             [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
                         ];
                         polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
@@ -527,19 +539,27 @@
                     circleMarker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                         icon: L.divIcon({
                             className: 'custom-arrival-pin',
-                            html: '<div style="background:#f59e0b; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2.5px solid white; box-shadow:0 4px 12px rgba(0,0,0,0.35);">📍</div>',
-                            iconSize: [28, 28],
-                            iconAnchor: [14, 14]
+                            html: '<div style="background:#f59e0b; color:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid white; box-shadow:0 4px 12px rgba(0,0,0,0.35);">📍</div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
                         })
                     }).addTo(leafletMap);
                 } else {
-                    circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
-                        radius: radiusSize,
-                        fillColor: markerColor,
-                        color: '#fff',
-                        weight: 2.5,
-                        fillOpacity: 1
-                    }).addTo(leafletMap);
+                    let stopIconHtml = '';
+                    if (s.name.includes("St. Stephen's Green")) {
+                        stopIconHtml = '<div style="background:#10b981; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; border:2px solid white;">🌳</div>';
+                        circleMarker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+                            icon: L.divIcon({ className: 'custom-park-pin', html: stopIconHtml, iconSize: [24, 24], iconAnchor: [12, 12] })
+                        }).addTo(leafletMap);
+                    } else {
+                        circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
+                            radius: radiusSize,
+                            fillColor: markerColor,
+                            color: '#fff',
+                            weight: 2.5,
+                            fillOpacity: 1
+                        }).addTo(leafletMap);
+                    }
                 }
 
                 const badge = isStart ? '<b>🌸 [Departure]</b><br>' : (isEnd ? '<b>🎯 [Arrival Destination]</b><br>' : '');
@@ -629,8 +649,8 @@
                             <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200">
                                 <span class="text-base">🚶‍♂️🔄</span>
                                 <div>
-                                    <p class="font-bold text-amber-900">Transfer & Walk via City Center</p>
-                                    <p class="text-amber-700 text-[11px]">Walk ~5 mins along O'Connell / Westmoreland St from RED Line (Abbey St) to GREEN Line (St. Stephen's Green).</p>
+                                    <p class="font-bold text-amber-900">Transfer & Walk along Marlborough St</p>
+                                    <p class="text-amber-700 text-[11px]">Walk ~3 mins from RED Line (Abbey St) to GREEN Line (O'Connell / Marlborough St).</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 p-2.5 bg-teal-50 rounded-xl border border-teal-100">
