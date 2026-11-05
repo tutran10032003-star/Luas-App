@@ -118,7 +118,7 @@
 
             <div class="w-full space-y-2">
                 <div class="relative">
-                    <input type="text" id="ai-query-input" placeholder="Ask AI destination..." class="w-full pl-3 pr-8 py-2 text-xs rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-emerald-50/30 font-semibold">
+                    <input type="text" id="ai-query-input" placeholder="Ask AI destination or attraction..." class="w-full pl-3 pr-8 py-2 text-xs rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-emerald-50/30 font-semibold">
                     <button onclick="aiFindStop()" class="absolute right-1.5 top-1.5 bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-lg text-xs">
                         ✨
                     </button>
@@ -197,7 +197,7 @@
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing optimized tram route.</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing actual street-following tram route.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -208,7 +208,7 @@
 
                     <!-- Map Legend Bar -->
                     <div class="flex flex-wrap items-center justify-center gap-4 pt-2 text-[11px] font-bold text-slate-600 border-t border-emerald-100">
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-pink-500 inline-block"><span></span> Departure</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-pink-500 inline-block"></span> Departure</div>
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Arrival Pin</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-red-500 inline-block rounded"></span> Red Line</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-emerald-500 inline-block rounded"></span> Green Line</div>
@@ -325,6 +325,16 @@
             { id: 'CHEW', name: 'Cherrywood', line: 'green', lat: 53.2415, lng: -6.1552 },
             { id: 'BRI', name: 'Brides Glen', line: 'green', lat: 53.2382, lng: -6.1485 }
         ];
+
+        // Dublin Attractions Database
+        const dublinAttractions = [
+            { name: "trinity college", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
+            { name: "guinness storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
+            { name: "st stephen's green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
+            { name: "temple bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
+            { name: "phoenix park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
+        ];
+
         let refreshTimer = null;
         let leafletMap = null;
         let mapMarkers = [];
@@ -430,7 +440,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival! Showing direct optimized travel route.";
+                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival! Showing actual street-following tram route.";
                 setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
@@ -495,19 +505,19 @@
                         polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
 
-                    // Real street-following pedestrian transfer path from Abbey St to O'Connell St / GPO
+                    // Accurate street-following pedestrian transfer path along Marlborough St / O'Connell Bridge
                     const transferCoords = [
                         [53.3486, -6.2593], // Abbey Street (Red Line)
-                        [53.3486, -6.2600], // Walk west along Abbey St
-                        [53.3500, -6.2601], // Walk north along O'Connell St sidewalk
-                        [53.3505, -6.2602]  // O'Connell GPO / Trinity area (Green Line connection)
+                        [53.3495, -6.2595], // North along Marlborough St
+                        [53.3505, -6.2601]  // O'Connell / GPO connection point
                     ];
-                    polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
+                    polylineLayers.push(L.polyline(transferCoords, {color: '#10b981', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
 
                     const eIdx = greenStopsList.findIndex(s => s.id === endId);
                     if (eIdx !== -1) {
                         const coords2 = [
-                            [53.3505, -6.2602],
+                            [53.3505, -6.2601],
+                            [53.3440, -6.2620], // Curving along street waypoints
                             [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
                         ];
                         polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
@@ -646,11 +656,11 @@
                                     <p class="text-slate-600 text-[11px]">Depart from <b>${startStop.name}</b></p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200">
+                            <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
                                 <span class="text-base">🚶‍♂️🔄</span>
                                 <div>
-                                    <p class="font-bold text-amber-900">Transfer & Walk along Marlborough St</p>
-                                    <p class="text-amber-700 text-[11px]">Walk ~3 mins from RED Line (Abbey St) to GREEN Line (O'Connell / Marlborough St).</p>
+                                    <p class="font-bold text-emerald-900">Transfer at Abbey Street</p>
+                                    <p class="text-emerald-700 text-[11px]">Walk ~3 mins from RED Line (Abbey St) to GREEN Line (O'Connell / Marlborough St).</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 p-2.5 bg-teal-50 rounded-xl border border-teal-100">
@@ -737,10 +747,35 @@
             const speech = document.getElementById('mascot-speech');
 
             if (!query) {
-                speech.innerText = "⚠️ Please type a stop name or keyword!";
+                speech.innerText = "⚠️ Please type a stop name or attraction!";
                 return;
             }
 
+            // Check Dublin Attractions first
+            const matchedAttraction = dublinAttractions.find(a => a.name.includes(query));
+            if (matchedAttraction) {
+                const stop = allStopsData.find(s => s.id === matchedAttraction.stopId);
+                if (stop) {
+                    document.getElementById('stop-start-select').value = stop.id;
+                    document.getElementById('weather-stop-select').value = stop.id;
+                    onStartStopChange();
+                    switchTab('map');
+                    
+                    if (leafletMap) {
+                        leafletMap.setView([matchedAttraction.lat, matchedAttraction.lng], 16);
+                        L.popup()
+                            .setLatLng([matchedAttraction.lat, matchedAttraction.lng])
+                            .setContent(`<div style="text-align:center;"><b>${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}</b><br>${matchedAttraction.desc}</div>`)
+                            .openOn(leafletMap);
+                    }
+
+                    speech.innerText = `${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}: ${matchedAttraction.desc} (Nearest Luas: ${stop.name})`;
+                    document.getElementById('ai-query-input').value = '';
+                    return;
+                }
+            }
+
+            // Fallback to Luas stops
             const matchedStop = allStopsData.find(s => s.name.toLowerCase().includes(query) || s.id.toLowerCase() === query);
 
             if (matchedStop) {
@@ -751,7 +786,7 @@
                 speech.innerText = `🎉 Found it! Jumped to ${matchedStop.name}!`;
                 document.getElementById('ai-query-input').value = '';
             } else {
-                speech.innerText = `❌ No stop found matching "${query}".`;
+                speech.innerText = `❌ No stop or attraction found matching "${query}". Try "Guinness", "Trinity", or stop names.`;
             }
         }
 
