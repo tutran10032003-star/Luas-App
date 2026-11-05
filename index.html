@@ -128,24 +128,16 @@
                 </div>
                 <div class="p-3 space-y-3">
                     <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
-                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Luas Buddy. I can help you explore Dublin, discover attractions and plan a Luas journey. Where shall we go?</div>
-                    </div>
-                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Quick questions</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button class="buddy-chip" onclick="buddyQuickAsk('Show me Dublin attractions')"><span class="text-xl">🏛️</span><span class="block text-[11px] font-extrabold text-emerald-950">Explore Dublin</span><span class="text-[10px] text-slate-500">Places to visit</span></button>
-                        <button class="buddy-chip" onclick="buddyQuickAsk('How do I get to an attraction?')"><span class="text-xl">🗺️</span><span class="block text-[11px] font-extrabold text-emerald-950">Plan a trip</span><span class="text-[10px] text-slate-500">Find a Luas route</span></button>
-                        <button class="buddy-chip" onclick="buddyQuickAsk('Show me parks')"><span class="text-xl">🌳</span><span class="block text-[11px] font-extrabold text-emerald-950">Parks & nature</span><span class="text-[10px] text-slate-500">Green places</span></button>
-                        <button class="buddy-chip" onclick="buddyQuickAsk('Tell me about food in Dublin')"><span class="text-xl">🍴</span><span class="block text-[11px] font-extrabold text-emerald-950">Food & culture</span><span class="text-[10px] text-slate-500">Local experiences</span></button>
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Luas Buddy. Tap any attraction below to instantly locate it on the map!</div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-2"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Pick an attraction</p><span class="text-[10px] text-slate-400">Dublin guide</span></div>
+                        <div class="flex items-center justify-between mb-2"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Dublin Attractions</p><span class="text-[10px] text-slate-400">Click to zoom map</span></div>
                         <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
                     <form class="flex gap-2 pt-2 border-t border-dashed border-emerald-200" onsubmit="event.preventDefault(); buddySendMessage();">
                         <input type="text" id="ai-query-input" placeholder="Ask me about Dublin or Luas..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
                         <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
                     </form>
-                    <p class="text-[9px] text-slate-500 text-center">Basic travel assistant · Information from the built-in Dublin guide</p>
                 </div>
             </section>
         </div>
@@ -219,7 +211,7 @@
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing actual street-following tram route.</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival!</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -234,7 +226,6 @@
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Arrival Pin</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-red-500 inline-block rounded"></span> Red Line</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-emerald-500 inline-block rounded"></span> Green Line</div>
-                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 border-t-2 border-dashed border-amber-500 inline-block"></span> Walking transfer</div>
                     </div>
                 </div>
             </div>
@@ -348,19 +339,18 @@
             { id: 'BRI', name: 'Brides Glen', line: 'green', lat: 53.2382, lng: -6.1485 }
         ];
 
-        // Dublin Attractions Database
+        // Dublin Attractions Database (In hoa chữ cái đầu)
         const dublinAttractions = [
-            { name: "trinity college", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
-            { name: "guinness storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
-            { name: "st stephen's green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
-            { name: "temple bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
-            { name: "phoenix park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
+            { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
+            { name: "Guinness Storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
+            { name: "St Stephen's Green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
+            { name: "Temple Bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
+            { name: "Phoenix Park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
         ];
 
         let refreshTimer = null;
         let leafletMap = null;
         let mapMarkers = [];
-        let polylineLayers = [];
         let userGpsMarker = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -459,7 +449,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival! Showing actual street-following tram route.";
+                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival!";
                 setTimeout(() => {
                     if (leafletMap) {
                         leafletMap.invalidateSize();
@@ -488,74 +478,10 @@
 
             mapMarkers.forEach(m => leafletMap.removeLayer(m));
             mapMarkers = [];
-            polylineLayers.forEach(l => leafletMap.removeLayer(l));
-            polylineLayers = [];
 
             const startStop = allStopsData.find(s => s.id === startId);
             const endStop = allStopsData.find(s => s.id === endId);
             if (!startStop || !endStop || !startStop.lat || !startStop.lng || !endStop.lat || !endStop.lng) return;
-
-            const startLine = (startStop.line || 'red').toLowerCase();
-            const endLine = (endStop.line || 'red').toLowerCase();
-
-            const redStopsList = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng);
-            const greenStopsList = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng);
-
-            if (startLine === endLine) {
-                const lineStops = startLine === 'red' ? redStopsList : greenStopsList;
-                const startIndex = lineStops.findIndex(s => s.id === startId);
-                const endIndex = lineStops.findIndex(s => s.id === endId);
-
-                if (startIndex !== -1 && endIndex !== -1) {
-                    const step = startIndex <= endIndex ? 1 : -1;
-                    const routeCoords = [];
-                    for (let i = startIndex; i !== endIndex + step; i += step) {
-                        routeCoords.push([parseFloat(lineStops[i].lat), parseFloat(lineStops[i].lng)]);
-                    }
-                    const routeColor = startLine === 'red' ? '#ef4444' : '#10b981';
-                    const polyRoute = L.polyline(routeCoords, {color: routeColor, weight: 6, opacity: 0.9}).addTo(leafletMap);
-                    polylineLayers.push(polyRoute);
-                }
-            } else {
-                if (startLine === 'red') {
-                    const sIdx = redStopsList.findIndex(s => s.id === startId);
-                    const abbIdx = redStopsList.findIndex(s => s.id === 'ABB');
-                    if (sIdx !== -1 && abbIdx !== -1) {
-                        const step = sIdx <= abbIdx ? 1 : -1;
-                        const coords1 = [];
-                        for (let i = sIdx; i !== abbIdx + step; i += step) {
-                            coords1.push([parseFloat(redStopsList[i].lat), parseFloat(redStopsList[i].lng)]);
-                        }
-                        polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
-                    }
-
-                    const transferCoords = [
-                        [53.3486, -6.2593],
-                        [53.3495, -6.2595],
-                        [53.3505, -6.2601]
-                    ];
-                    polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
-
-                    const eIdx = greenStopsList.findIndex(s => s.id === endId);
-                    if (eIdx !== -1) {
-                        const coords2 = [
-                            [53.3505, -6.2601],
-                            [53.3440, -6.2620],
-                            [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
-                        ];
-                        polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
-                    }
-                } else {
-                    const eIdx = redStopsList.findIndex(s => s.id === endId);
-                    if (eIdx !== -1) {
-                        const coords2 = [
-                            [parseFloat(redStopsList[eIdx].lat), parseFloat(redStopsList[eIdx].lng)],
-                            [53.3486, -6.2593]
-                        ];
-                        polylineLayers.push(L.polyline(coords2, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
-                    }
-                }
-            }
 
             allStopsData.forEach(s => {
                 if (!s.lat || !s.lng) return;
@@ -785,16 +711,16 @@
         function renderBuddyAttractions(filter = '') {
             const list = document.getElementById('buddy-attraction-list');
             if (!list) return;
-            const items = dublinAttractions.filter(a => !filter || a.name.includes(filter.toLowerCase()));
+            const items = dublinAttractions.filter(a => !filter || a.name.toLowerCase().includes(filter.toLowerCase()));
             list.innerHTML = '';
-            items.slice(0, 5).forEach(a => {
+            items.forEach(a => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'buddy-attraction flex items-center gap-2 text-xs w-full';
                 const icon = document.createElement('span'); icon.className = 'text-xl'; icon.textContent = a.icon;
                 const label = document.createElement('span'); label.className = 'min-w-0 flex-1';
-                const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950 capitalize'; title.textContent = a.name;
-                const desc = document.createElement('span'); desc.className = 'block text-[10px] text-slate-500'; desc.textContent = 'Tap to explore';
+                const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950'; title.textContent = a.name; // Đã in hoa chữ cái đầu sẵn trong mảng
+                const desc = document.createElement('span'); desc.className = 'block text-[10px] text-slate-500'; desc.textContent = 'Tap to locate on map';
                 label.append(title, desc);
                 const arrow = document.createElement('span'); arrow.className = 'text-emerald-600 font-bold'; arrow.textContent = '›';
                 button.append(icon, label, arrow);
@@ -806,7 +732,7 @@
         function buddyShowAttraction(attraction) {
             buddyAddMessage(`Tell me about ${attraction.name}`, 'user');
             const stop = allStopsData.find(s => s.id === attraction.stopId);
-            buddyAddMessage(`${attraction.icon} ${attraction.name.replace(/\b\w/g, c => c.toUpperCase())}: ${attraction.desc}${stop ? ` Nearest Luas stop is ${stop.name}.` : ''}`);
+            buddyAddMessage(`${attraction.icon} ${attraction.name}: ${attraction.desc}${stop ? ` Nearest Luas stop is ${stop.name}.` : ''}`);
             if (leafletMap) {
                 switchTab('map');
                 setTimeout(() => {
@@ -814,11 +740,6 @@
                     L.popup().setLatLng([attraction.lat, attraction.lng]).setContent(`<b>${attraction.icon} ${attraction.name}</b><br>${attraction.desc}`).openOn(leafletMap);
                 }, 200);
             }
-        }
-
-        function buddyQuickAsk(question) {
-            document.getElementById('ai-query-input').value = question;
-            buddySendMessage();
         }
 
         function buddySendMessage() {
@@ -829,16 +750,16 @@
             input.value = '';
             const q = query.toLowerCase();
 
-            const attraction = dublinAttractions.find(a => a.name.includes(q));
+            const attraction = dublinAttractions.find(a => a.name.toLowerCase().includes(q));
             if (attraction) {
                 buddyShowAttraction(attraction);
                 return;
             }
-            buddyAddMessage(`I found your request regarding "${query}". Try tapping on Dublin attractions above or selecting your start/end stations in the Trip Planner! 🚋`);
+            buddyAddMessage(`I found your request regarding "${query}". Try tapping on Dublin attractions above or selecting your stations in the Trip Planner! 🚋`);
         }
 
         function resetBuddyChat() {
-            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Where would you like to explore in Dublin?</div>';
+            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Tap any attraction below to instantly locate it on the map!</div>';
             document.getElementById('ai-query-input').value = '';
             renderBuddyAttractions();
         }
