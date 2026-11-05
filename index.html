@@ -50,8 +50,6 @@
         .buddy-panel { background: linear-gradient(145deg,#fff8df 0%,#f0fffa 100%); border: 2px solid #a7f3d0; box-shadow: 0 8px 24px rgba(16,185,129,.10); }
         .buddy-header { background: linear-gradient(110deg,#f7c85c,#f5a65b); color:#5b351c; }
         .buddy-message { border-radius: 18px 18px 18px 5px; background:#fff; border:1px solid #c8f3e2; }
-        .buddy-chip { border:2px solid #75d8c6; background:#fff; border-radius:18px; text-align:left; padding:10px 12px; box-shadow:0 3px 0 #b9eee2; transition:transform .15s, box-shadow .15s; }
-        .buddy-chip:hover { transform:translateY(-2px); box-shadow:0 5px 0 #b9eee2; }
         .buddy-attraction { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
         .buddy-attraction:hover { background:#fff4d6; border-color:#f6c65d; }
         #buddy-chat-log { max-height:220px; overflow-y:auto; }
@@ -94,7 +92,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT VỚI CẢM XÚC THAY ĐỔI THEO THỜI TIẾT -->
+        <!-- CỘT TRÁI: MASCOT VỚI BẢNG CHAT (Ô INPUT ĐÃ ĐƯỢC ĐƯA XUỐNG DƯỚI ĐÚNG Ý BỒ) -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -128,14 +126,27 @@
                 </div>
                 <div class="p-3 space-y-3">
                     <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
-                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Luas Buddy. Tap any attraction below to instantly locate it on the map!</div>
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Luas Buddy. Select Region & tap any attraction below to instantly zoom and locate it on the map!</div>
                     </div>
+                    
+                    <!-- Region Selector -->
                     <div>
-                        <div class="flex items-center justify-between mb-2"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Dublin Attractions</p><span class="text-[10px] text-slate-400">Click to zoom map</span></div>
+                        <label class="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">Select Region</label>
+                        <select id="region-select" onchange="onRegionChange()" class="w-full px-3 py-2 rounded-xl border border-emerald-200 text-xs font-bold bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                            <option value="dublin">Dublin (Luas Network)</option>
+                            <option value="galway">Galway</option>
+                            <option value="cork">Cork</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-2"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions</p><span class="text-[10px] text-slate-400">Click to zoom map</span></div>
                         <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
+
+                    <!-- Ô NHẬP TIN NHẮN ĐÃ NẰM Ở DƯỚI CÙNG -->
                     <form class="flex gap-2 pt-2 border-t border-dashed border-emerald-200" onsubmit="event.preventDefault(); buddySendMessage();">
-                        <input type="text" id="ai-query-input" placeholder="Ask me about Dublin or Luas..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
+                        <input type="text" id="ai-query-input" placeholder="Ask me about attractions..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
                         <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
                     </form>
                 </div>
@@ -162,7 +173,7 @@
                     </div>
                 </div>
 
-                <!-- Bảng hướng dẫn hành trình chi tiết từng bước -->
+                <!-- Bảng hướng dẫn hành trình tối ưu chuẩn Google Maps (Đã tinh gọn) -->
                 <div id="route-summary-box" class="hidden bg-white border border-emerald-200 p-4 rounded-3xl shadow-sm space-y-3">
                     <div class="flex items-center justify-between border-b border-emerald-100 pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Optimized Trip Route & Transfer Guide</span>
@@ -339,14 +350,26 @@
             { id: 'BRI', name: 'Brides Glen', line: 'green', lat: 53.2382, lng: -6.1485 }
         ];
 
-        // Dublin Attractions Database (In hoa chữ cái đầu)
-        const dublinAttractions = [
-            { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
-            { name: "Guinness Storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
-            { name: "St Stephen's Green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
-            { name: "Temple Bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
-            { name: "Phoenix Park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
-        ];
+        // Regions & Attractions Database (In hoa chữ cái đầu)
+        const regionsData = {
+            dublin: [
+                { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
+                { name: "Guinness Storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
+                { name: "St Stephen's Green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
+                { name: "Temple Bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
+                { name: "Phoenix Park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
+            ],
+            galway: [
+                { name: "Eyre Square", lat: 53.2734, lng: -9.0519, desc: "A popular central public park and focal point in Galway city.", icon: "🌳", stopId: "STS" },
+                { name: "Spanish Arch", lat: 53.2704, lng: -9.0565, desc: "Historic extension of the 16th-century town walls by the Corrib river.", icon: "⚓", stopId: "STS" },
+                { name: "Salthill Promenade", lat: 53.2612, lng: -9.0782, desc: "Scenic seaside walkway overlooking Galway Bay.", icon: "🌊", stopId: "STS" }
+            ],
+            cork: [
+                { name: "English Market", lat: 53.3438, lng: -6.2546, desc: "Famous 18th-century covered food market in the heart of Cork city.", icon: "🍎", stopId: "STS" },
+                { name: "Cork City Gaol", lat: 53.3419, lng: -6.2867, desc: "Spectacular 19th-century prison visitor attraction.", icon: "🧱", stopId: "HEU" },
+                { name: "St Fin Barre's Cathedral", lat: 53.3382, lng: -6.2625, desc: "Stunning French Gothic revival cathedral with three spires.", icon: "⛪", stopId: "STS" }
+            ]
+        };
 
         let refreshTimer = null;
         let leafletMap = null;
@@ -355,7 +378,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             populateStopsDropdowns(allStopsData);
-            renderBuddyAttractions();
+            onRegionChange();
             initLeafletMap();
             startRealtimeClock();
 
@@ -575,6 +598,7 @@
             }
         }
 
+        // Tối ưu hóa hiển thị Trip Planner chuẩn Google Maps (Đã tinh gọn)
         function updateRouteSummary(startId, endId) {
             const startStop = allStopsData.find(s => s.id === startId);
             const endStop = allStopsData.find(s => s.id === endId);
@@ -590,8 +614,8 @@
                         <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
                             <span class="text-lg">🚊</span>
                             <div>
-                                <p class="font-bold text-emerald-900">Direct Journey on ${startStop.line.toUpperCase()} Line</p>
-                                <p class="text-slate-600 text-[11px]">Board direct tram from <b>${startStop.name}</b> to <b>${endStop.name}</b>.</p>
+                                <p class="font-bold text-emerald-900">${startStop.name} ➔ ${endStop.name}</p>
+                                <p class="text-slate-600 text-[11px]">Direct journey on ${startStop.line.toUpperCase()} Line.</p>
                             </div>
                         </div>
                     `;
@@ -601,22 +625,22 @@
                             <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
                                 <span class="text-base font-bold text-emerald-700">1</span>
                                 <div>
-                                    <p class="font-bold text-emerald-900">Board ${startStop.line.toUpperCase()} Line Tram</p>
-                                    <p class="text-slate-600 text-[11px]">Depart from <b>${startStop.name}</b></p>
+                                    <p class="font-bold text-emerald-900">${startStop.name} (${startStop.line.toUpperCase()} Line)</p>
+                                    <p class="text-slate-600 text-[11px]">Depart from starting station</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
+                            <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200">
                                 <span class="text-base">🚶‍♂️🔄</span>
                                 <div>
-                                    <p class="font-bold text-emerald-900">Transfer at Abbey Street</p>
-                                    <p class="text-emerald-700 text-[11px]">Walk ~3 mins from RED Line (Abbey St) to GREEN Line (O'Connell / Marlborough St).</p>
+                                    <p class="font-bold text-amber-900">Transfer at Abbey Street</p>
+                                    <p class="text-amber-700 text-[11px]">Walk ~3 mins to switch lines.</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 p-2.5 bg-teal-50 rounded-xl border border-teal-100">
                                 <span class="text-base font-bold text-teal-700">2</span>
                                 <div>
-                                    <p class="font-bold text-teal-900">Board ${endStop.line.toUpperCase()} Line Tram</p>
-                                    <p class="text-slate-600 text-[11px]">Arrive at final destination <b>${endStop.name}</b></p>
+                                    <p class="font-bold text-teal-900">${endStop.name} (${endStop.line.toUpperCase()} Line)</p>
+                                    <p class="text-slate-600 text-[11px]">Arrival station</p>
                                 </div>
                             </div>
                         </div>
@@ -708,10 +732,11 @@
             log.scrollTop = log.scrollHeight;
         }
 
-        function renderBuddyAttractions(filter = '') {
+        function onRegionChange() {
+            const region = document.getElementById('region-select').value;
             const list = document.getElementById('buddy-attraction-list');
             if (!list) return;
-            const items = dublinAttractions.filter(a => !filter || a.name.toLowerCase().includes(filter.toLowerCase()));
+            const items = regionsData[region] || [];
             list.innerHTML = '';
             items.forEach(a => {
                 const button = document.createElement('button');
@@ -719,8 +744,8 @@
                 button.className = 'buddy-attraction flex items-center gap-2 text-xs w-full';
                 const icon = document.createElement('span'); icon.className = 'text-xl'; icon.textContent = a.icon;
                 const label = document.createElement('span'); label.className = 'min-w-0 flex-1';
-                const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950'; title.textContent = a.name; // Đã in hoa chữ cái đầu sẵn trong mảng
-                const desc = document.createElement('span'); desc.className = 'block text-[10px] text-slate-500'; desc.textContent = 'Tap to locate on map';
+                const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950'; title.textContent = a.name;
+                const desc = document.createElement('span'); desc.className = 'block text-[10px] text-slate-500'; desc.textContent = 'Tap to zoom map';
                 label.append(title, desc);
                 const arrow = document.createElement('span'); arrow.className = 'text-emerald-600 font-bold'; arrow.textContent = '›';
                 button.append(icon, label, arrow);
@@ -732,7 +757,7 @@
         function buddyShowAttraction(attraction) {
             buddyAddMessage(`Tell me about ${attraction.name}`, 'user');
             const stop = allStopsData.find(s => s.id === attraction.stopId);
-            buddyAddMessage(`${attraction.icon} ${attraction.name}: ${attraction.desc}${stop ? ` Nearest Luas stop is ${stop.name}.` : ''}`);
+            buddyAddMessage(`${attraction.icon} ${attraction.name}: ${attraction.desc}${stop ? ` Nearest stop: ${stop.name}.` : ''}`);
             if (leafletMap) {
                 switchTab('map');
                 setTimeout(() => {
@@ -750,18 +775,19 @@
             input.value = '';
             const q = query.toLowerCase();
 
-            const attraction = dublinAttractions.find(a => a.name.toLowerCase().includes(q));
+            const region = document.getElementById('region-select').value;
+            const attraction = regionsData[region].find(a => a.name.toLowerCase().includes(q));
             if (attraction) {
                 buddyShowAttraction(attraction);
                 return;
             }
-            buddyAddMessage(`I found your request regarding "${query}". Try tapping on Dublin attractions above or selecting your stations in the Trip Planner! 🚋`);
+            buddyAddMessage(`I found your request regarding "${query}". Try selecting your stations in Trip Planner or tapping attractions above! 🚋`);
         }
 
         function resetBuddyChat() {
-            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Tap any attraction below to instantly locate it on the map!</div>';
+            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Select Region & tap any attraction below to zoom map!</div>';
             document.getElementById('ai-query-input').value = '';
-            renderBuddyAttractions();
+            onRegionChange();
         }
 
         function onStartStopChange() {
