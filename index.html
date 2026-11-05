@@ -234,7 +234,7 @@
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Arrival Pin</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-red-500 inline-block rounded"></span> Red Line</div>
                         <div class="flex items-center gap-1.5"><span class="w-6 h-1 bg-emerald-500 inline-block rounded"></span> Green Line</div>
-                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 border-t-2 border-dashed border-orange-500 inline-block"></span> Walking transfer</div>
+                        <div class="flex items-center gap-1.5"><span class="w-6 h-1 border-t-2 border-dashed border-amber-500 inline-block"></span> Walking transfer</div>
                     </div>
                 </div>
             </div>
@@ -354,18 +354,7 @@
             { name: "guinness storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
             { name: "st stephen's green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
             { name: "temple bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
-            { name: "phoenix park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" },
-            { name: "national museum of ireland", lat: 53.3401, lng: -6.2548, desc: "Discover Irish archaeology, history and remarkable artefacts. Check the museum's official site for current exhibitions and opening details.", icon: "🏺", stopId: "STS" },
-            { name: "national gallery of ireland", lat: 53.3409, lng: -6.2548, desc: "Explore Irish and European art near Merrion Square.", icon: "🎨", stopId: "STS" },
-            { name: "merrion square", lat: 53.3396, lng: -6.2503, desc: "A beautiful Georgian square with gardens, sculptures and colourful doors nearby.", icon: "🌷", stopId: "STS" },
-            { name: "dublin castle", lat: 53.3429, lng: -6.2674, desc: "A historic landmark with state rooms, gardens and centuries of Dublin history.", icon: "🏰", stopId: "JER" },
-            { name: "christ church cathedral", lat: 53.3430, lng: -6.2711, desc: "A landmark medieval cathedral in the heart of the old city.", icon: "⛪", stopId: "FOUR" },
-            { name: "st patrick's cathedral", lat: 53.3397, lng: -6.2713, desc: "One of Dublin's best-known historic cathedrals, set beside a peaceful garden.", icon: "⛪", stopId: "FOUR" },
-            { name: "kilmainham gaol", lat: 53.3418, lng: -6.3097, desc: "A former prison and important site in Irish history. Tours generally need advance booking.", icon: "🧱", stopId: "HEU" },
-            { name: "irish museum of modern art", lat: 53.3439, lng: -6.3005, desc: "Modern and contemporary art in the historic Royal Hospital Kilmainham grounds.", icon: "🖼️", stopId: "HEU" },
-            { name: "national botanic gardens", lat: 53.3733, lng: -6.2699, desc: "A lovely garden escape with glasshouses and plant collections; check visitor information before travelling.", icon: "🌿", stopId: "CON" },
-            { name: "the spire", lat: 53.3498, lng: -6.2603, desc: "A striking 120-metre landmark on O'Connell Street, close to central shopping streets.", icon: "🗼", stopId: "ABB" },
-            { name: "ha'penny bridge", lat: 53.3469, lng: -6.2634, desc: "An iconic pedestrian bridge across the River Liffey, ideal for a short city-centre stroll.", icon: "🌉", stopId: "JER" }
+            { name: "phoenix park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
         ];
 
         let refreshTimer = null;
@@ -396,7 +385,6 @@
                 const currentStart = document.getElementById('stop-start-select').value;
                 if (currentStart) fetchForecast(currentStart, true);
             }, 20000);
-
         });
 
         function startRealtimeClock() {
@@ -542,7 +530,7 @@
                         [53.3495, -6.2595], // North along Marlborough St
                         [53.3505, -6.2601]  // O'Connell / GPO connection point
                     ];
-                    polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 5, opacity: 0.98, dashArray: '7, 8'}).addTo(leafletMap));
+                    polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
 
                     const eIdx = greenStopsList.findIndex(s => s.id === endId);
                     if (eIdx !== -1) {
@@ -580,7 +568,7 @@
                     circleMarker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                         icon: L.divIcon({
                             className: 'custom-arrival-pin',
-                            html: '<div style="background:#ff786e; color:white; width:34px; height:34px; border-radius:50% 50% 50% 8px; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; font-size:17px; border:2.5px solid white; box-shadow:0 4px 12px rgba(0,0,0,0.30);"><span style="transform:rotate(45deg)">🏁</span></div>',
+                            html: '<div style="background:#f59e0b; color:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid white; box-shadow:0 4px 12px rgba(0,0,0,0.35);">📍</div>',
                             iconSize: [30, 30],
                             iconAnchor: [15, 15]
                         })
@@ -795,10 +783,10 @@
             if (!list) return;
             const items = dublinAttractions.filter(a => !filter || a.name.includes(filter.toLowerCase()));
             list.innerHTML = '';
-            items.slice(0, 6).forEach(a => {
+            items.slice(0, 5).forEach(a => {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'buddy-attraction flex items-center gap-2 text-xs';
+                button.className = 'buddy-attraction flex items-center gap-2 text-xs w-full';
                 const icon = document.createElement('span'); icon.className = 'text-xl'; icon.textContent = a.icon;
                 const label = document.createElement('span'); label.className = 'min-w-0 flex-1';
                 const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950 capitalize'; title.textContent = a.name;
@@ -809,42 +797,19 @@
                 button.addEventListener('click', () => buddyShowAttraction(a));
                 list.appendChild(button);
             });
-            if (!items.length) list.innerHTML = '<p class="text-[10px] text-slate-500">No matching attractions in this quick guide yet.</p>';
         }
 
         function buddyShowAttraction(attraction) {
             buddyAddMessage(`Tell me about ${attraction.name}`, 'user');
             const stop = allStopsData.find(s => s.id === attraction.stopId);
-            buddyAddMessage(`${attraction.icon} ${attraction.name.replace(/\b\w/g, c => c.toUpperCase())}: ${attraction.desc}${stop ? ` The nearest Luas stop in this guide is ${stop.name} (${stop.line.toUpperCase()} Line).` : ''}`);
-            const actions = document.createElement('div');
-            actions.className = 'flex flex-wrap gap-2';
-            const routeBtn = document.createElement('button');
-            routeBtn.className = 'rounded-full bg-[#ffcf69] px-3 py-2 text-[10px] font-extrabold text-amber-950 shadow-sm';
-            routeBtn.textContent = '🗺️ Plan a trip here';
-            routeBtn.onclick = () => buddySetDestination(attraction);
-            const moreBtn = document.createElement('button');
-            moreBtn.className = 'rounded-full bg-white border border-emerald-200 px-3 py-2 text-[10px] font-bold text-emerald-800';
-            moreBtn.textContent = '✨ Suggest another place';
-            moreBtn.onclick = () => buddyQuickAsk('Show me Dublin attractions');
-            actions.append(routeBtn, moreBtn);
-            document.getElementById('buddy-chat-log').appendChild(actions);
-            document.getElementById('buddy-chat-log').scrollTop = 99999;
+            buddyAddMessage(`${attraction.icon} ${attraction.name.replace(/\b\w/g, c => c.toUpperCase())}: ${attraction.desc}${stop ? ` Nearest Luas stop is ${stop.name}.` : ''}`);
             if (leafletMap) {
                 switchTab('map');
                 setTimeout(() => {
                     leafletMap.setView([attraction.lat, attraction.lng], 16);
-                    L.popup().setLatLng([attraction.lat, attraction.lng]).setContent(`<b>${attraction.icon} ${attraction.name.replace(/</g,'&lt;')}</b><br>${attraction.desc.replace(/</g,'&lt;')}`).openOn(leafletMap);
-                }, 250);
+                    L.popup().setLatLng([attraction.lat, attraction.lng]).setContent(`<b>${attraction.icon} ${attraction.name}</b><br>${attraction.desc}`).openOn(leafletMap);
+                }, 200);
             }
-        }
-
-        function buddySetDestination(attraction) {
-            const stop = allStopsData.find(s => s.id === attraction.stopId);
-            if (!stop) { buddyAddMessage('I do not have a nearby Luas stop for this place yet.'); return; }
-            document.getElementById('stop-end-select').value = stop.id;
-            onEndStopChange();
-            switchTab('forecast');
-            buddyAddMessage(`I've set ${stop.name} as your arrival station. Choose your departure station to complete the journey! 🚋`);
         }
 
         function buddyQuickAsk(question) {
@@ -860,32 +825,12 @@
             input.value = '';
             const q = query.toLowerCase();
 
-            if (/attraction|places to visit|explore dublin|show me places|sightseeing/.test(q)) {
-                buddyAddMessage('Here are a few Dublin places to explore. Tap any card to learn more and plan a Luas trip! 🧡');
-                renderBuddyAttractions();
+            const attraction = dublinAttractions.find(a => a.name.includes(q));
+            if (attraction) {
+                buddyShowAttraction(attraction);
                 return;
             }
-            if (/park|nature|garden|green place/.test(q)) {
-                const parks = dublinAttractions.filter(a => /park|green|garden/.test(a.name));
-                buddyAddMessage('Here are some green spaces and garden stops for a relaxing visit:');
-                parks.forEach(a => buddyAddMessage(`${a.icon} ${a.name.replace(/\b\w/g,c=>c.toUpperCase())} — ${a.desc}`));
-                return;
-            }
-            if (/food|restaurant|eat|cafe/.test(q)) {
-                buddyAddMessage('I can help you explore Dublin areas, but this basic guide does not contain live restaurant listings yet. Try Temple Bar for a lively food-and-culture area, and check venues directly for current menus and opening times.');
-                return;
-            }
-            const attraction = dublinAttractions.find(a => a.name.includes(q) || q.includes(a.name));
-            if (attraction) { buddyShowAttraction(attraction); return; }
-            const stop = allStopsData.find(s => s.name.toLowerCase().includes(q) || q === s.id.toLowerCase());
-            if (stop) {
-                document.getElementById('stop-start-select').value = stop.id;
-                document.getElementById('weather-stop-select').value = stop.id;
-                onStartStopChange(); switchTab('forecast');
-                buddyAddMessage(`Found ${stop.name} on the ${stop.line.toUpperCase()} Line. I've set it as your departure station. You can choose your destination in Trip Planner.`);
-                return;
-            }
-            buddyAddMessage('I can answer basic questions about the attractions shown below and help find Luas stops. Try “Show me Dublin attractions”, “Parks”, “Trinity College” or “How do I get to Heuston?”');
+            buddyAddMessage(`I found your request regarding "${query}". Try tapping on Dublin attractions above or selecting your start/end stations in the Trip Planner! 🚋`);
         }
 
         function resetBuddyChat() {
@@ -903,7 +848,6 @@
                 return;
             }
 
-            // Check Dublin Attractions first
             const matchedAttraction = dublinAttractions.find(a => a.name.includes(query));
             if (matchedAttraction) {
                 const stop = allStopsData.find(s => s.id === matchedAttraction.stopId);
@@ -915,30 +859,24 @@
                     
                     if (leafletMap) {
                         leafletMap.setView([matchedAttraction.lat, matchedAttraction.lng], 16);
-                        L.popup()
-                            .setLatLng([matchedAttraction.lat, matchedAttraction.lng])
-                            .setContent(`<div style="text-align:center;"><b>${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}</b><br>${matchedAttraction.desc}</div>`)
-                            .openOn(leafletMap);
+                        L.popup().setLatLng([matchedAttraction.lat, matchedAttraction.lng]).setContent(`<b>${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}</b><br>${matchedAttraction.desc}`).openOn(leafletMap);
                     }
-
-                    speech.innerText = `${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}: ${matchedAttraction.desc} (Nearest Luas: ${stop.name})`;
+                    speech.innerText = `${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}: ${matchedAttraction.desc}`;
                     document.getElementById('ai-query-input').value = '';
                     return;
                 }
             }
 
-            // Fallback to Luas stops
             const matchedStop = allStopsData.find(s => s.name.toLowerCase().includes(query) || s.id.toLowerCase() === query);
-
             if (matchedStop) {
                 document.getElementById('stop-start-select').value = matchedStop.id;
                 document.getElementById('weather-stop-select').value = matchedStop.id;
                 onStartStopChange();
                 switchTab('forecast');
-                speech.innerText = `🎉 Found it! Jumped to ${matchedStop.name}!`;
+                speech.innerText = `🎉 Jumped to ${matchedStop.name}!`;
                 document.getElementById('ai-query-input').value = '';
             } else {
-                speech.innerText = `❌ No stop or attraction found matching "${query}". Try "Guinness", "Trinity", or stop names.`;
+                speech.innerText = `❌ No stop or attraction found matching "${query}".`;
             }
         }
 
@@ -980,7 +918,6 @@
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Europe/Dublin`);
                 const weatherData = await res.json();
-                
                 if (weatherData && weatherData.current) {
                     renderWeatherInfo(weatherData.current, stopName);
                 }
@@ -1039,193 +976,52 @@
             const outfitText2 = document.getElementById('outfit-text-2');
 
             if (weatherCategory === "rain") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="3" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="3" fill="#1E293B"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M46 54C46 51 54 51 54 54" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M22 26C22 14 78 14 78 26C63 24 37 24 22 26Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="2"/>
-                      <path d="M50 26V36" stroke="#334155" stroke-width="2.5"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `🌧️ Oh no, it's raining at ${stopName} (${temp}°C)! Don't forget your umbrella & raincoat.`;
-                outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Waterproof Raincoat / Jacket";
-                outfitIcon2.innerText = "☂️";
-                outfitText2.innerText = "Compact Umbrella & Boots";
-
-            } else if (weatherCategory === "cloudy") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M38 22C38 18 44 15 49 18C52 14 60 15 61 20C65 20 67 24 64 27H36C33 25 35 22 38 22Z" fill="#94A3B8" stroke="#64748B" stroke-width="1.5"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `🌥️ Cloudy at ${stopName} (${temp}°C)! A light casual jacket is ideal.`;
-                outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Light Bomber or Casual Jacket";
-                outfitIcon2.innerText = "👟";
-                outfitText2.innerText = "Comfortable Sneakers";
-
-            } else if (weatherCategory === "windy") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M45 52Q50 48 55 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M26 58H74V66H26Z" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `💨 Windy at ${stopName} (${temp}°C)! Wear a windbreaker & scarf.`;
-                outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Windbreaker Jacket";
-                outfitIcon2.innerText = "🧣";
-                outfitText2.innerText = "Warm Scarf";
-
-            } else if (weatherCategory === "freezing") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M47 52C47 54 53 54 53 52" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M28 35C28 20 72 20 72 35H28Z" fill="#8B5CF6" stroke="#5B21B6" stroke-width="2"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `❄️ Freezing at ${stopName} (${temp}°C)! Wear Puffertech coat & beanie.`;
-                outfitIcon1.innerText = "🧥";
-                outfitText1.innerText = "Puffertech Heavy Down Jacket";
-                outfitIcon2.innerText = "🧶";
-                outfitText2.innerText = "Thermal Beanie & Gloves";
-
+                mascotContainer.innerHTML = `<svg width="95" height="95" viewBox="0 0 100 100" fill="none"><rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/><path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/><rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/><circle cx="42" cy="46" r="3" fill="#1E293B"/><circle cx="58" cy="46" r="3" fill="#1E293B"/><circle cx="36" cy="53" r="3" fill="#FCA5A5"/><circle cx="64" cy="53" r="3" fill="#FCA5A5"/><path d="M46 54C46 51 54 51 54 54" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M22 26C22 14 78 14 78 26C63 24 37 24 22 26Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="2"/><path d="M50 26V36" stroke="#334155" stroke-width="2.5"/></svg>`;
+                mascotSpeech.innerText = `🌧️ Rain at ${stopName} (${temp}°C)! Don't forget your umbrella.`;
+                outfitIcon1.innerText = "🧥"; outfitText1.innerText = "Waterproof Raincoat";
+                outfitIcon2.innerText = "☂️"; outfitText2.innerText = "Compact Umbrella";
             } else if (weatherCategory === "chilly") {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <circle cx="42" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="58" cy="46" r="3.5" fill="#1E293B"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M26 58H74V65H26Z" fill="#14B8A6" stroke="#0F766E" stroke-width="2"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `🧥 Chilly at ${stopName} (${temp}°C)! Cozy knit sweater is recommended.`;
-                outfitIcon1.innerText = "🧶";
-                outfitText1.innerText = "Cozy Knit Sweater / Cardigan";
-                outfitIcon2.innerText = "🧣";
-                outfitText2.innerText = "Light Scarf & Sneakers";
-
+                mascotContainer.innerHTML = `<svg width="95" height="95" viewBox="0 0 100 100" fill="none"><rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/><path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/><rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/><circle cx="42" cy="46" r="3.5" fill="#1E293B"/><circle cx="58" cy="46" r="3.5" fill="#1E293B"/><circle cx="36" cy="53" r="3" fill="#FCA5A5"/><circle cx="64" cy="53" r="3" fill="#FCA5A5"/><path d="M47 51C47 53 53 53 53 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M26 58H74V65H26Z" fill="#14B8A6" stroke="#0F766E" stroke-width="2"/></svg>`;
+                mascotSpeech.innerText = `🧥 Chilly at ${stopName} (${temp}°C)! Cozy knit sweater recommended.`;
+                outfitIcon1.innerText = "🧶"; outfitText1.innerText = "Cozy Knit Sweater";
+                outfitIcon2.innerText = "🧣"; outfitText2.innerText = "Light Scarf & Sneakers";
             } else {
-                mascotContainer.innerHTML = `
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
-                      <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
-                      <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
-                      <path d="M39 46C39 43 45 43 45 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
-                      <path d="M55 46C55 43 61 43 61 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
-                      <circle cx="36" cy="53" r="3" fill="#FCA5A5"/>
-                      <circle cx="64" cy="53" r="3" fill="#FCA5A5"/>
-                      <path d="M44 51C44 54 56 54 56 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
-                      <circle cx="34" cy="66" r="3" fill="#FDE047"/>
-                      <circle cx="66" cy="66" r="3" fill="#FDE047"/>
-                    </svg>
-                `;
-                mascotSpeech.innerText = `☀️ Wonderful sunny weather at ${stopName} (${temp}°C)! Enjoy your smooth Luas trip today.`;
-                outfitIcon1.innerText = "👕";
-                outfitText1.innerText = "Light T-shirt or casual shirt";
-                outfitIcon2.innerText = "🕶️";
-                outfitText2.innerText = "Sunglasses & Sneakers";
+                mascotContainer.innerHTML = `<svg width="95" height="95" viewBox="0 0 100 100" fill="none"><rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/><path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/><rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/><path d="M39 46C39 43 45 43 45 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/><path d="M55 46C55 43 61 43 61 46" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/><circle cx="36" cy="53" r="3" fill="#FCA5A5"/><circle cx="64" cy="53" r="3" fill="#FCA5A5"/><path d="M44 51C44 54 56 54 56 51" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><circle cx="34" cy="66" r="3" fill="#FDE047"/><circle cx="66" cy="66" r="3" fill="#FDE047"/></svg>`;
+                mascotSpeech.innerText = `☀️ Pleasant weather at ${stopName} (${temp}°C)! Enjoy your Luas trip today.`;
+                outfitIcon1.innerText = "👕"; outfitText1.innerText = "Light T-shirt or casual shirt";
+                outfitIcon2.innerText = "🕶️"; outfitText2.innerText = "Sunglasses & Sneakers";
             }
         }
 
         async function fetchForecast(stopId, isBackground = false) {
             hideError();
             if (!isBackground) {
-                document.getElementById('directions-container').innerHTML = `
-                    <div class="text-center text-slate-400 py-8 text-sm flex flex-col items-center gap-2">
-                        <span class="text-2xl mascot-float">🤖💨</span>
-                        <p class="font-bold text-emerald-800 text-xs">AI is fetching live schedule...</p>
-                    </div>
-                `;
+                document.getElementById('directions-container').innerHTML = `<div class="text-center text-slate-400 py-8 text-sm">Fetching live schedule...</div>`;
             }
-
             try {
                 const response = await fetch(`${BASE_URL}/forecast?stop=${stopId}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-
                 renderForecast(data);
-                
-                const now = new Date().toLocaleTimeString();
-                document.getElementById('last-updated').innerText = `Last updated: ${now}`;
-
-                const statusText = document.getElementById('stop-status-text');
-                const stopName = data.stopName || stopId;
-                statusText.innerText = `Departure [${stopName}] is active. Service status: "${data.message || 'Normal'}". Next trams are syncing live!`;
-
+                document.getElementById('last-updated').innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
             } catch (error) {
                 showError(`Failed to fetch live forecast: ${error.message}`);
                 if (!isBackground) {
-                    document.getElementById('directions-container').innerHTML = `
-                        <div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>
-                    `;
+                    document.getElementById('directions-container').innerHTML = `<div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>`;
                 }
-                document.getElementById('stop-status-text').innerText = `⚠️ Unable to retrieve status for this stop right now.`;
             }
         }
 
         function renderForecast(data) {
             document.getElementById('board-stop-name').innerText = data.stopName || data.stop || 'Tram Board';
-
-            const msgBox = document.getElementById('service-message-box');
-            const msgText = document.getElementById('service-message-text');
-            if (data.message && data.message.trim() !== '' && data.message.toLowerCase() !== 'normal service operating') {
-                msgText.innerText = data.message;
-                msgBox.classList.remove('hidden');
-            } else {
-                msgBox.classList.add('hidden');
-            }
-
             const container = document.getElementById('directions-container');
             let html = '';
-
             if (!data.directions || data.directions.length === 0) {
                 html = `<div class="text-center text-slate-400 py-6 text-xs">No directions available right now.</div>`;
             } else {
                 data.directions.forEach(dir => {
-                    html += `
-                        <div class="bg-emerald-50/40 border border-emerald-100/80 p-4 rounded-2xl">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-3 flex items-center gap-1.5">
-                                <span>🧭</span> ${dir.name || dir.direction || 'Direction'}
-                            </h3>
-                    `;
-
+                    html += `<div class="bg-emerald-50/40 border border-emerald-100/80 p-4 rounded-2xl"><h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-3">🧭 ${dir.name || dir.direction || 'Direction'}</h3>`;
                     const trams = (dir.trams || []).slice(0, 3);
-
                     if (trams.length === 0) {
                         html += `<p class="text-xs text-slate-400 italic bg-white p-3 rounded-xl border border-emerald-100">No upcoming trams.</p>`;
                     } else {
@@ -1233,21 +1029,7 @@
                         trams.forEach(tram => {
                             const dueVal = tram.due !== undefined ? tram.due : tram.dueMins;
                             const isDueNow = dueVal === 0 || dueVal === '0' || String(dueVal).toLowerCase() === 'due';
-                            const dest = tram.destination || tram.dest || 'Unknown';
-
-                            html += `
-                                <div class="bg-white border border-emerald-100 p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="text-lg">🚊</span>
-                                        <span class="font-bold text-sm text-emerald-950">${dest}</span>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="px-3 py-1 rounded-xl text-xs font-bold ${isDueNow ? 'bg-amber-400 text-white shadow-sm' : 'bg-emerald-100 text-emerald-900'}">
-                                            ${isDueNow ? 'Due' : dueVal + ' min'}
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
+                            html += `<div class="bg-white border border-emerald-100 p-3.5 rounded-2xl flex items-center justify-between shadow-sm"><span class="font-bold text-sm text-emerald-950">🚊 ${tram.destination || tram.dest || 'Unknown'}</span><span class="px-3 py-1 rounded-xl text-xs font-bold ${isDueNow ? 'bg-amber-400 text-white shadow-sm' : 'bg-emerald-100 text-emerald-900'}">${isDueNow ? 'Due' : dueVal + ' min'}</span></div>`;
                         });
                         html += `</div>`;
                     }
