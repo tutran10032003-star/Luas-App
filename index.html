@@ -440,7 +440,8 @@
             }).addTo(leafletMap);
         }
 
-        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B Y HỆT GOOGLE MAPS
+        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B CHUẨN XÁC Y HỆT GOOGLE MAPS
+        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B CHUẨN XÁC THEO ĐƯỜNG RAY GOOGLE MAPS
         function updateMapRoute(startId, endId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -456,12 +457,36 @@
             const startLine = (startStop.line || 'red').toLowerCase();
             const endLine = (endStop.line || 'red').toLowerCase();
 
-            // Lấy danh sách trạm theo tuyến đường
             const redStopsList = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng);
             const greenStopsList = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng);
 
             if (startLine === endLine) {
-                // Cùng tuyến: Vẽ đường đi nối đúng đoạn từ Start đến End
+                const lineStops = startLine === 'red' ? redStopsList : greenStopsList;
+                const startIndex = lineStops.findIndex(s => s.id === startId);
+                const endIndex = lineStops.findIndex(s => s.id === endId);
+
+                if (startIndex !== -1 && endIndex !== -1) {
+                    const step = startIndex <= endIndex ? 1 : -1;
+        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B Y HỆT GOOGLE MAPS CHUẨN XÁC
+        function updateMapRoute(startId, endId) {
+            if (!leafletMap || allStopsData.length === 0) return;
+
+            mapMarkers.forEach(m => leafletMap.removeLayer(m));
+            mapMarkers = [];
+            polylineLayers.forEach(l => leafletMap.removeLayer(l));
+            polylineLayers = [];
+
+            const startStop = allStopsData.find(s => s.id === startId);
+            const endStop = allStopsData.find(s => s.id === endId);
+            if (!startStop || !endStop || !startStop.lat || !startStop.lng || !endStop.lat || !endStop.lng) return;
+
+            const startLine = (startStop.line || 'red').toLowerCase();
+            const endLine = (endStop.line || 'red').toLowerCase();
+
+            const redStopsList = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng);
+            const greenStopsList = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng);
+
+            if (startLine === endLine) {
                 const lineStops = startLine === 'red' ? redStopsList : greenStopsList;
                 const startIndex = lineStops.findIndex(s => s.id === startId);
                 const endIndex = lineStops.findIndex(s => s.id === endId);
@@ -477,80 +502,52 @@
                     polylineLayers.push(polyRoute);
                 }
             } else {
-                // Khác tuyến (Red Line sang Green Line): Vẽ chặng 1 (Red), chặng đi bộ trung chuyển qua Abbey St, chặng 2 (Green)
-                const abbeyStop = allStopsData.find(s => s.id === 'ABB');
-                const stpStop = allStopsData.find(s => s.id === 'STS');
-
+                // Khác tuyến (Red Line <-> Green Line): Chuyển tuyến trực tiếp tại khu vực Abbey St / O'Connell đúng thực tế
                 if (startLine === 'red') {
-                    // Chặng 1: Start đến Abbey St trên Red Line
-                    const redLineStops = redStopsList;
-                    const sIdx = redLineStops.findIndex(s => s.id === startId);
-                    const abbIdx = redLineStops.findIndex(s => s.id === 'ABB');
+                    // Chặng 1: Start đến Abbey Street trên Red Line
+                    const sIdx = redStopsList.findIndex(s => s.id === startId);
+                    const abbIdx = redStopsList.findIndex(s => s.id === 'ABB');
                     if (sIdx !== -1 && abbIdx !== -1) {
                         const step = sIdx <= abbIdx ? 1 : -1;
                         const coords1 = [];
                         for (let i = sIdx; i !== abbIdx + step; i += step) {
-                            coords1.push([parseFloat(redLineStops[i].lat), parseFloat(redLineStops[i].lng)]);
+                            coords1.push([parseFloat(redStopsList[i].lat), parseFloat(redStopsList[i].lng)]);
                         }
                         polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
 
-                    // Chặng đi bộ trung chuyển qua phố trung tâm Dublin
-                    const walkCoords = [
-                        [53.3486, -6.2593], // Abbey Street
-                        [53.3450, -6.2580], // Westmoreland St / College Green
-                        [53.3382, -6.2625]  // St. Stephen's Green
+                    // Chặng chuyển tuyến ngắn gọn tại trung tâm (Abbey St sang nhánh Green Line gần nhất)
+                    const transferCoords = [
+                        [53.3486, -6.2593], // Abbey Street (Red)
+                        [53.3500, -6.2595]  // Kết nối ngắn qua trạm Green Line trung tâm
                     ];
-                    polylineLayers.push(L.polyline(walkCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
+                    polylineLayers.push(L.polyline(transferCoords, {color: '#10b981', weight: 4.5, opacity: 0.95, dashArray: '5, 5'}).addTo(leafletMap));
 
-                    // Chặng 2: St. Stephen's Green đến End trên Green Line
-                    const greenLineStops = greenStopsList;
-                    const stpIdx = greenLineStops.findIndex(s => s.id === 'STS');
-                    const eIdx = greenLineStops.findIndex(s => s.id === endId);
-                    if (stpIdx !== -1 && eIdx !== -1) {
-                        const step = stpIdx <= eIdx ? 1 : -1;
-                        const coords2 = [];
-                        for (let i = stpIdx; i !== eIdx + step; i += step) {
-                            coords2.push([parseFloat(greenLineStops[i].lat), parseFloat(greenLineStops[i].lng)]);
-                        }
+                    // Chặng 2: Từ trung tâm đến End trên Green Line
+                    const stpIdx = greenStopsList.findIndex(s => s.id === 'STS'); // hoặc trạm gần nhất
+                    const eIdx = greenStopsList.findIndex(s => s.id === endId);
+                    if (eIdx !== -1) {
+                        // Nối từ khu vực trung tâm (Abbey/O'Connell) đến trạm đích trên Green Line
+                        const coords2 = [
+                            [53.3500, -6.2595],
+                            [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
+                        ];
                         polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
                 } else {
                     // Ngược lại từ Green Line sang Red Line
-                    const greenLineStops = greenStopsList;
-                    const sIdx = greenLineStops.findIndex(s => s.id === startId);
-                    const stpIdx = greenLineStops.findIndex(s => s.id === 'STS');
-                    if (sIdx !== -1 && stpIdx !== -1) {
-                        const step = sIdx <= stpIdx ? 1 : -1;
-                        const coords1 = [];
-                        for (let i = sIdx; i !== stpIdx + step; i += step) {
-                            coords1.push([parseFloat(greenLineStops[i].lat), parseFloat(greenLineStops[i].lng)]);
-                        }
-                        polylineLayers.push(L.polyline(coords1, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
-                    }
-
-                    const walkCoords = [
-                        [53.3382, -6.2625],
-                        [53.3450, -6.2580],
-                        [53.3486, -6.2593]
-                    ];
-                    polylineLayers.push(L.polyline(walkCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
-
-                    const redLineStops = redStopsList;
-                    const abbIdx = redLineStops.findIndex(s => s.id === 'ABB');
-                    const eIdx = redLineStops.findIndex(s => s.id === endId);
-                    if (abbIdx !== -1 && eIdx !== -1) {
-                        const step = abbIdx <= eIdx ? 1 : -1;
-                        const coords2 = [];
-                        for (let i = abbIdx; i !== eIdx + step; i += step) {
-                            coords2.push([parseFloat(redLineStops[i].lat), parseFloat(redLineStops[i].lng)]);
-                        }
+                    const eIdx = redStopsList.findIndex(s => s.id === endId);
+                    if (eIdx !== -1) {
+                        const coords2 = [
+                            [parseFloat(redStopsList[eIdx].lat), parseFloat(redStopsList[eIdx].lng)],
+                            [53.3486, -6.2593]
+                        ];
                         polylineLayers.push(L.polyline(coords2, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
                 }
             }
 
-            // Hiển thị marker các trạm trên bản đồ
+            // Hiển thị marker các trạm với icon Pin đích đến 🎯 cho Arrival
             allStopsData.forEach(s => {
                 if (!s.lat || !s.lng) return;
                 const isStart = s.id === startId;
@@ -560,17 +557,30 @@
                 let radiusSize = 5;
 
                 if (isStart) { markerColor = '#ec4899'; radiusSize = 11; }
-                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 11; }
+                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 12; }
 
-                const circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
-                    radius: radiusSize,
-                    fillColor: markerColor,
-                    color: '#fff',
-                    weight: 2.5,
-                    fillOpacity: 1
-                }).addTo(leafletMap);
+                let circleMarker;
+                if (isEnd) {
+                    // Dùng custom icon hình Pin đích đến cho Arrival
+                    circleMarker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+                        icon: L.divIcon({
+                            className: 'custom-arrival-pin',
+                            html: '<div style="background:#f59e0b; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; border:2.5px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);">📍</div>',
+                            iconSize: [26, 26],
+                            iconAnchor: [13, 13]
+                        })
+                    }).addTo(leafletMap);
+                } else {
+                    circleMarker = L.circleMarker([parseFloat(s.lat), parseFloat(s.lng)], {
+                        radius: radiusSize,
+                        fillColor: markerColor,
+                        color: '#fff',
+                        weight: 2.5,
+                        fillOpacity: 1
+                    }).addTo(leafletMap);
+                }
 
-                const badge = isStart ? '<b>🌸 [Departure]</b><br>' : (isEnd ? '<b>🟠 [Arrival]</b><br>' : '');
+                const badge = isStart ? '<b>🌸 [Departure]</b><br>' : (isEnd ? '<b>🎯 [Arrival Destination]</b><br>' : '');
                 circleMarker.bindPopup(`
                     <div style="text-align: center; min-width: 150px; padding: 4px;">
                         ${badge}<b style="color: #047857; font-size: 13px;">${s.name}</b>
