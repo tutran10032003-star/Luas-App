@@ -116,7 +116,7 @@
                 </div>
             </div>
             <h3 class="font-bold text-emerald-900 text-base mb-1">Luas Buddy</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Your cute Dublin travel companion! 🚋</p>
+            <p id="mascot-speech" class="text-xs text-emerald-700 font-semibold mb-3">Your cute Dublin travel companion! 🚋</p>
 
             <section class="buddy-panel w-full rounded-3xl overflow-hidden text-left">
                 <div class="buddy-header px-4 py-3 flex items-center justify-between">
@@ -460,7 +460,12 @@
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
                 mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival! Showing actual street-following tram route.";
-                setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
+                setTimeout(() => {
+                    if (leafletMap) {
+                        leafletMap.invalidateSize();
+                        fitRouteBounds();
+                    }
+                }, 150);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
                 btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
@@ -524,11 +529,10 @@
                         polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
 
-                    // Accurate street-following pedestrian transfer path along Marlborough St / O'Connell Bridge
                     const transferCoords = [
-                        [53.3486, -6.2593], // Abbey Street (Red Line)
-                        [53.3495, -6.2595], // North along Marlborough St
-                        [53.3505, -6.2601]  // O'Connell / GPO connection point
+                        [53.3486, -6.2593],
+                        [53.3495, -6.2595],
+                        [53.3505, -6.2601]
                     ];
                     polylineLayers.push(L.polyline(transferCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
 
@@ -536,7 +540,7 @@
                     if (eIdx !== -1) {
                         const coords2 = [
                             [53.3505, -6.2601],
-                            [53.3440, -6.2620], // Curving along street waypoints
+                            [53.3440, -6.2620],
                             [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
                         ];
                         polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
@@ -837,47 +841,6 @@
             document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Where would you like to explore in Dublin?</div>';
             document.getElementById('ai-query-input').value = '';
             renderBuddyAttractions();
-        }
-
-        function aiFindStop() {
-            const query = document.getElementById('ai-query-input').value.trim().toLowerCase();
-            const speech = document.getElementById('mascot-speech');
-
-            if (!query) {
-                speech.innerText = "⚠️ Please type a stop name or attraction!";
-                return;
-            }
-
-            const matchedAttraction = dublinAttractions.find(a => a.name.includes(query));
-            if (matchedAttraction) {
-                const stop = allStopsData.find(s => s.id === matchedAttraction.stopId);
-                if (stop) {
-                    document.getElementById('stop-start-select').value = stop.id;
-                    document.getElementById('weather-stop-select').value = stop.id;
-                    onStartStopChange();
-                    switchTab('map');
-                    
-                    if (leafletMap) {
-                        leafletMap.setView([matchedAttraction.lat, matchedAttraction.lng], 16);
-                        L.popup().setLatLng([matchedAttraction.lat, matchedAttraction.lng]).setContent(`<b>${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}</b><br>${matchedAttraction.desc}`).openOn(leafletMap);
-                    }
-                    speech.innerText = `${matchedAttraction.icon} ${matchedAttraction.name.toUpperCase()}: ${matchedAttraction.desc}`;
-                    document.getElementById('ai-query-input').value = '';
-                    return;
-                }
-            }
-
-            const matchedStop = allStopsData.find(s => s.name.toLowerCase().includes(query) || s.id.toLowerCase() === query);
-            if (matchedStop) {
-                document.getElementById('stop-start-select').value = matchedStop.id;
-                document.getElementById('weather-stop-select').value = matchedStop.id;
-                onStartStopChange();
-                switchTab('forecast');
-                speech.innerText = `🎉 Jumped to ${matchedStop.name}!`;
-                document.getElementById('ai-query-input').value = '';
-            } else {
-                speech.innerText = `❌ No stop or attraction found matching "${query}".`;
-            }
         }
 
         function onStartStopChange() {
