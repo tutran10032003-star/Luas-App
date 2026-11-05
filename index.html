@@ -90,7 +90,6 @@
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
-                    <!-- SVG Mặc định -->
                     <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
@@ -154,9 +153,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Trip Planner & Interchange Guide</span>
                         <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Step-by-Step</span>
                     </div>
-                    <div id="route-steps-container" class="space-y-2 text-xs font-medium text-emerald-950">
-                        <!-- Step items inserted dynamically -->
-                    </div>
+                    <div id="route-steps-container" class="space-y-2 text-xs font-medium text-emerald-950"></div>
                 </div>
 
                 <div id="stop-status-bubble" class="bg-emerald-50 border border-emerald-200 p-4 rounded-3xl text-xs font-medium text-emerald-900 flex items-center gap-3">
@@ -235,6 +232,7 @@
                             <p id="weather-temp" class="text-3xl font-extrabold">--°C</p>
                             <p id="weather-wind" class="text-xs text-emerald-100">Wind speed: -- km/h</p>
                         </div>
+                        <!-- Icon thời tiết nhất quán -->
                         <div id="weather-icon-lg" class="text-6xl">🌤️</div>
                     </div>
 
@@ -468,7 +466,8 @@
             if (startLine !== endLine) {
                 const abbey = [53.3486, -6.2593];
                 const stStephen = [53.3382, -6.2625];
-                const polyTransfer = L.polyline([abbey, stStephen], {color: '#3b82f6', weight: 4.5, opacity: 0.95, dashArray: '5, 5'}).addTo(leafletMap);
+                // Đổi nét đứt nối tuyến sang màu cam vàng trang nhã thay vì xanh dương lộn xộn
+                const polyTransfer = L.polyline([abbey, stStephen], {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap);
                 polylineLayers.push(polyTransfer);
             }
 
@@ -557,33 +556,33 @@
 
                 if (startStop.line === endStop.line) {
                     stepsHtml = `
-                        <div class="flex items-center gap-2 p-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                            <span class="text-base">🚊</span>
+                        <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <span class="text-lg">🚊</span>
                             <div>
                                 <p class="font-bold text-emerald-900">Direct Journey on ${startStop.line.toUpperCase()} Line</p>
-                                <p class="text-slate-600 text-[11px]">From <b>${startStop.name}</b> directly to <b>${endStop.name}</b> without transfers.</p>
+                                <p class="text-slate-600 text-[11px]">Board direct tram from <b>${startStop.name}</b> to <b>${endStop.name}</b>.</p>
                             </div>
                         </div>
                     `;
                 } else {
                     stepsHtml = `
                         <div class="space-y-2">
-                            <div class="flex items-center gap-2 p-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                                <span class="text-base">1️⃣</span>
+                            <div class="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <span class="text-base font-bold text-emerald-700">1</span>
                                 <div>
                                     <p class="font-bold text-emerald-900">Board ${startStop.line.toUpperCase()} Line Tram</p>
                                     <p class="text-slate-600 text-[11px]">Depart from <b>${startStop.name}</b></p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 p-2 bg-amber-50 rounded-xl border border-amber-200">
+                            <div class="flex items-center gap-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200">
                                 <span class="text-base">🔄</span>
                                 <div>
                                     <p class="font-bold text-amber-900">Transfer at Abbey Street / O'Connell</p>
-                                    <p class="text-amber-700 text-[11px]">Walk briefly to switch from RED Line to GREEN Line.</p>
+                                    <p class="text-amber-700 text-[11px]">Walk briefly between RED Line and GREEN Line platforms.</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 p-2 bg-teal-50 rounded-xl border border-teal-100">
-                                <span class="text-base">2️⃣</span>
+                            <div class="flex items-center gap-2 p-2.5 bg-teal-50 rounded-xl border border-teal-100">
+                                <span class="text-base font-bold text-teal-700">2</span>
                                 <div>
                                     <p class="font-bold text-teal-900">Board ${endStop.line.toUpperCase()} Line Tram</p>
                                     <p class="text-slate-600 text-[11px]">Arrive at final destination <b>${endStop.name}</b></p>
