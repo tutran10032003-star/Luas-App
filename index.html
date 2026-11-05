@@ -112,7 +112,7 @@
             
             <div class="bg-emerald-50/80 border border-emerald-200/60 p-3.5 rounded-2xl text-left w-full mb-3">
                 <p id="mascot-speech" class="text-xs text-emerald-900 leading-relaxed font-medium">
-                    👋 Hello! Select your Departure and Arrival stations to plan your Luas journey!
+                    👋 Hello! Select your Departure and Arrival stations to plan your optimal route!
                 </p>
             </div>
 
@@ -150,8 +150,8 @@
                 <!-- Bảng hướng dẫn hành trình chi tiết từng bước -->
                 <div id="route-summary-box" class="hidden bg-white border border-emerald-200 p-4 rounded-3xl shadow-sm space-y-3">
                     <div class="flex items-center justify-between border-b border-emerald-100 pb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Trip Planner & Interchange Guide</span>
-                        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Step-by-Step</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Optimized Trip Route & Transfer Guide</span>
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Google Maps Style</span>
                     </div>
                     <div id="route-steps-container" class="space-y-2 text-xs font-medium text-emerald-950"></div>
                 </div>
@@ -195,9 +195,9 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
-                                <span>🗺️</span> Interactive Dublin Map & Station Weather
+                                <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 🟠 Orange is Arrival! Tap any station dot to check live weather.</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 🟠 Orange is Arrival! Showing direct optimized travel route.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -421,7 +421,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Orange dot is Arrival! Tap any station dot to check live weather.";
+                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Orange dot is Arrival! Showing direct optimized travel route.";
                 setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
@@ -440,6 +440,7 @@
             }).addTo(leafletMap);
         }
 
+        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B Y HỆT GOOGLE MAPS
         function updateMapRoute(startId, endId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -450,31 +451,106 @@
 
             const startStop = allStopsData.find(s => s.id === startId);
             const endStop = allStopsData.find(s => s.id === endId);
-            if (!startStop || !startStop.lat || !startStop.lng) return;
+            if (!startStop || !endStop || !startStop.lat || !startStop.lng || !endStop.lat || !endStop.lng) return;
 
             const startLine = (startStop.line || 'red').toLowerCase();
-            const endLine = (endStop && endStop.line ? endStop.line : startLine).toLowerCase();
+            const endLine = (endStop.line || 'red').toLowerCase();
 
-            const redStops = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
-            const greenStops = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng).map(s => [parseFloat(s.lat), parseFloat(s.lng)]);
-            
-            const polyRed = L.polyline(redStops, {color: '#ef4444', weight: 5, opacity: 0.85}).addTo(leafletMap);
-            const polyGreen = L.polyline(greenStops, {color: '#10b981', weight: 5, opacity: 0.85}).addTo(leafletMap);
-            polylineLayers.push(polyRed, polyGreen);
+            // Lấy danh sách trạm theo tuyến đường
+            const redStopsList = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng);
+            const greenStopsList = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng);
 
-            if (startLine !== endLine) {
-                // Tuyến đường đi bộ trung chuyển bám sát qua các tuyến phố trung tâm Dublin (Abbey Street ➔ O'Connell ➔ College Green ➔ Grafton St ➔ St. Stephen's Green)
-                const walkingTransferPath = [
-                    [53.3486, -6.2593], // Abbey Street (Red Line platform)
-                    [53.3475, -6.2590], // O'Connell Street Lower
-                    [53.3450, -6.2580], // College Green / Westmoreland St junction
-                    [53.3420, -6.2600], // Nassau St / Grafton St corner
-                    [53.3382, -6.2625]  // St. Stephen's Green (Green Line platform)
-                ];
-                const polyTransfer = L.polyline(walkingTransferPath, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap);
-                polylineLayers.push(polyTransfer);
+            if (startLine === endLine) {
+                // Cùng tuyến: Vẽ đường đi nối đúng đoạn từ Start đến End
+                const lineStops = startLine === 'red' ? redStopsList : greenStopsList;
+                const startIndex = lineStops.findIndex(s => s.id === startId);
+                const endIndex = lineStops.findIndex(s => s.id === endId);
+
+                if (startIndex !== -1 && endIndex !== -1) {
+                    const step = startIndex <= endIndex ? 1 : -1;
+                    const routeCoords = [];
+                    for (let i = startIndex; i !== endIndex + step; i += step) {
+                        routeCoords.push([parseFloat(lineStops[i].lat), parseFloat(lineStops[i].lng)]);
+                    }
+                    const routeColor = startLine === 'red' ? '#ef4444' : '#10b981';
+                    const polyRoute = L.polyline(routeCoords, {color: routeColor, weight: 6, opacity: 0.9}).addTo(leafletMap);
+                    polylineLayers.push(polyRoute);
+                }
+            } else {
+                // Khác tuyến (Red Line sang Green Line): Vẽ chặng 1 (Red), chặng đi bộ trung chuyển qua Abbey St, chặng 2 (Green)
+                const abbeyStop = allStopsData.find(s => s.id === 'ABB');
+                const stpStop = allStopsData.find(s => s.id === 'STS');
+
+                if (startLine === 'red') {
+                    // Chặng 1: Start đến Abbey St trên Red Line
+                    const redLineStops = redStopsList;
+                    const sIdx = redLineStops.findIndex(s => s.id === startId);
+                    const abbIdx = redLineStops.findIndex(s => s.id === 'ABB');
+                    if (sIdx !== -1 && abbIdx !== -1) {
+                        const step = sIdx <= abbIdx ? 1 : -1;
+                        const coords1 = [];
+                        for (let i = sIdx; i !== abbIdx + step; i += step) {
+                            coords1.push([parseFloat(redLineStops[i].lat), parseFloat(redLineStops[i].lng)]);
+                        }
+                        polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
+                    }
+
+                    // Chặng đi bộ trung chuyển qua phố trung tâm Dublin
+                    const walkCoords = [
+                        [53.3486, -6.2593], // Abbey Street
+                        [53.3450, -6.2580], // Westmoreland St / College Green
+                        [53.3382, -6.2625]  // St. Stephen's Green
+                    ];
+                    polylineLayers.push(L.polyline(walkCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
+
+                    // Chặng 2: St. Stephen's Green đến End trên Green Line
+                    const greenLineStops = greenStopsList;
+                    const stpIdx = greenLineStops.findIndex(s => s.id === 'STS');
+                    const eIdx = greenLineStops.findIndex(s => s.id === endId);
+                    if (stpIdx !== -1 && eIdx !== -1) {
+                        const step = stpIdx <= eIdx ? 1 : -1;
+                        const coords2 = [];
+                        for (let i = stpIdx; i !== eIdx + step; i += step) {
+                            coords2.push([parseFloat(greenLineStops[i].lat), parseFloat(greenLineStops[i].lng)]);
+                        }
+                        polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
+                    }
+                } else {
+                    // Ngược lại từ Green Line sang Red Line
+                    const greenLineStops = greenStopsList;
+                    const sIdx = greenLineStops.findIndex(s => s.id === startId);
+                    const stpIdx = greenLineStops.findIndex(s => s.id === 'STS');
+                    if (sIdx !== -1 && stpIdx !== -1) {
+                        const step = sIdx <= stpIdx ? 1 : -1;
+                        const coords1 = [];
+                        for (let i = sIdx; i !== stpIdx + step; i += step) {
+                            coords1.push([parseFloat(greenLineStops[i].lat), parseFloat(greenLineStops[i].lng)]);
+                        }
+                        polylineLayers.push(L.polyline(coords1, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
+                    }
+
+                    const walkCoords = [
+                        [53.3382, -6.2625],
+                        [53.3450, -6.2580],
+                        [53.3486, -6.2593]
+                    ];
+                    polylineLayers.push(L.polyline(walkCoords, {color: '#f59e0b', weight: 4.5, opacity: 0.95, dashArray: '6, 6'}).addTo(leafletMap));
+
+                    const redLineStops = redStopsList;
+                    const abbIdx = redLineStops.findIndex(s => s.id === 'ABB');
+                    const eIdx = redLineStops.findIndex(s => s.id === endId);
+                    if (abbIdx !== -1 && eIdx !== -1) {
+                        const step = abbIdx <= eIdx ? 1 : -1;
+                        const coords2 = [];
+                        for (let i = abbIdx; i !== eIdx + step; i += step) {
+                            coords2.push([parseFloat(redLineStops[i].lat), parseFloat(redLineStops[i].lng)]);
+                        }
+                        polylineLayers.push(L.polyline(coords2, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
+                    }
+                }
             }
 
+            // Hiển thị marker các trạm trên bản đồ
             allStopsData.forEach(s => {
                 if (!s.lat || !s.lng) return;
                 const isStart = s.id === startId;
