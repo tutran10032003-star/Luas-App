@@ -52,7 +52,7 @@
         .buddy-message { border-radius: 18px 18px 18px 5px; background:#fff; border:1px solid #c8f3e2; }
         .buddy-attraction { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
         .buddy-attraction:hover { background:#fff4d6; border-color:#f6c65d; }
-        #buddy-chat-log { max-height:220px; overflow-y:auto; }
+        #buddy-chat-log { max-height:180px; overflow-y:auto; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-emerald-200">
@@ -92,7 +92,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT VỚI BẢNG CHAT (Ô CHAT DƯỚI CÙNG) -->
+        <!-- CỘT TRÁI: MASCOT & CHAT -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -114,7 +114,7 @@
                 </div>
             </div>
             <h3 class="font-bold text-emerald-900 text-base mb-1">Luas Buddy</h3>
-            <p id="mascot-speech" class="text-xs text-emerald-700 font-semibold mb-3">Your cute Dublin travel companion! 🚋</p>
+            <p id="mascot-speech" class="text-xs text-emerald-700 font-semibold mb-3">Your cute Irish travel companion! 🇮🇪</p>
 
             <section class="buddy-panel w-full rounded-3xl overflow-hidden text-left">
                 <div class="buddy-header px-4 py-3 flex items-center justify-between">
@@ -122,10 +122,15 @@
                         <span class="text-2xl">🚋</span>
                         <div><p class="font-extrabold text-sm">Ask Luas Buddy</p><p class="text-[10px] font-semibold opacity-80">● Ready to help</p></div>
                     </div>
-                    <button onclick="resetBuddyChat()" class="text-[10px] font-bold bg-white/70 hover:bg-white px-3 py-2 rounded-full">New chat ↻</button>
-                    <!-- Region / County Selector -->
+                    <button onclick="resetBuddyChat()" class="text-[10px] font-bold bg-white/70 hover:bg-white px-3 py-1.5 rounded-full">New chat ↻</button>
+                </div>
+                <div class="p-3 space-y-3">
+                    <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Choose region & tap any attraction to zoom map!</div>
+                    </div>
+
                     <div>
-                        <label class="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">Select County / Region</label>
+                        <label class="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">Select Region / County</label>
                         <select id="region-select" onchange="onRegionChange()" class="w-full px-3 py-2 rounded-xl border border-emerald-200 text-xs font-bold bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                             <option value="dublin">Dublin County</option>
                             <option value="cork">Cork County</option>
@@ -140,14 +145,14 @@
                     </div>
 
                     <div>
-                        <div class="flex items-center justify-between mb-2"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions</p><span class="text-[10px] text-slate-400">Click to zoom map</span></div>
-                        <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto"></div>
+                        <div class="flex items-center justify-between mb-1.5"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions</p><span class="text-[9px] text-slate-400">Click to zoom map</span></div>
+                        <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto"></div>
                     </div>
 
                     <!-- Ô NHẬP TIN NHẮN DƯỚI CÙNG -->
                     <form class="flex gap-2 pt-2 border-t border-dashed border-emerald-200" onsubmit="event.preventDefault(); buddySendMessage();">
-                        <input type="text" id="ai-query-input" placeholder="Ask me about attractions..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
-                        <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
+                        <input type="text" id="ai-query-input" placeholder="Ask about attractions..." class="min-w-0 flex-1 px-3 py-2 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
+                        <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-3.5 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
                     </form>
                 </div>
             </section>
@@ -173,7 +178,7 @@
                     </div>
                 </div>
 
-                <!-- Bảng hướng dẫn hành trình tối ưu chuẩn Google Maps -->
+                <!-- Bảng hướng dẫn hành trình chuẩn Google Maps -->
                 <div id="route-summary-box" class="hidden bg-white border border-emerald-200 p-4 rounded-3xl shadow-sm space-y-3">
                     <div class="flex items-center justify-between border-b border-emerald-100 pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">🧭 Optimized Trip Route & Transfer Guide</span>
@@ -324,12 +329,13 @@
             { id: 'TAL', name: 'Tallaght', line: 'red', lat: 53.2852, lng: -6.3742 },
             { id: 'CHE', name: 'Cheeverstown', line: 'red', lat: 53.2815, lng: -6.4112 },
             { id: 'SAG', name: 'Saggart', line: 'red', lat: 53.2882, lng: -6.4321 },
-
             { id: 'STS', name: "St. Stephen's Green", line: 'green', lat: 53.3382, lng: -6.2625 },
             { id: 'HAR', name: 'Harcourt', line: 'green', lat: 53.3335, lng: -6.2652 },
             { id: 'CHR', name: 'Charlemont', line: 'green', lat: 53.3302, lng: -6.2638 },
-            { id: 'RAN', name: 'Ranelagh', line: 'green', lat: 53.3251, lng: -6.2592 },
-        // Regions & Attractions Database (Tọa độ chính xác thực tế của Ireland)
+            { id: 'RAN', name: 'Ranelagh', line: 'green', lat: 53.3251, lng: -6.2592 }
+        ];
+
+        // Regions & Attractions Database (Tọa độ chính xác thực tế)
         const regionsData = {
             dublin: [
                 { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
@@ -466,7 +472,7 @@
             if (tabName === 'forecast') {
                 forecastTab.classList.remove('hidden');
                 btnForecast.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "✨ You're viewing live tram arrivals & trip planning! Select your departure and arrival stations.";
+                mascotSpeech.innerText = "✨ You're viewing live tram arrivals & trip planning!";
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
@@ -480,7 +486,7 @@
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
                 btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🌦️ Check weather conditions and tailored clothing advice for your selected station!";
+                mascotSpeech.innerText = "🌦️ Check weather conditions and clothing advice!";
                 fetchWeatherForStop(document.getElementById('weather-stop-select').value);
             }
         }
@@ -597,7 +603,6 @@
             }
         }
 
-        // Tối ưu Trip Planner theo đúng chuẩn yêu cầu
         function updateRouteSummary(startId, endId) {
             const startStop = allStopsData.find(s => s.id === startId);
             const endStop = allStopsData.find(s => s.id === endId);
@@ -926,7 +931,6 @@
             const container = document.getElementById('directions-container');
             let html = '';
             
-            // Lọc và sắp xếp hiển thị chuyến đi thực tế rõ ràng, không dùng chữ inbound/outbound
             const allTrams = [];
             if (data.directions) {
                 data.directions.forEach(dir => {
