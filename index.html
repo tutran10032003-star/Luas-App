@@ -197,7 +197,7 @@
                             <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 🟠 Orange is Arrival! Showing direct optimized travel route.</p>
+                            <p class="text-xs text-slate-500">🟣 Magenta is Departure, 📍 Pin icon is Arrival! Showing direct optimized travel route.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
@@ -327,8 +327,8 @@
             initLeafletMap();
             startRealtimeClock();
 
-            const savedStart = localStorage.getItem('myLuas_startStop') || 'MYS';
-            const savedEnd = localStorage.getItem('myLuas_endStop') || 'TPT';
+            const savedStart = localStorage.getItem('myLuas_startStop') || 'TPT';
+            const savedEnd = localStorage.getItem('myLuas_endStop') || 'STS';
             
             document.getElementById('stop-start-select').value = savedStart;
             document.getElementById('stop-end-select').value = savedEnd;
@@ -421,7 +421,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Orange dot is Arrival! Showing direct optimized travel route.";
+                mascotSpeech.innerText = "🗺️ Pink dot is Departure, Pin icon is Arrival! Showing direct optimized travel route.";
                 setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
@@ -440,34 +440,6 @@
             }).addTo(leafletMap);
         }
 
-        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B CHUẨN XÁC Y HỆT GOOGLE MAPS
-        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B CHUẨN XÁC THEO ĐƯỜNG RAY GOOGLE MAPS
-        function updateMapRoute(startId, endId) {
-            if (!leafletMap || allStopsData.length === 0) return;
-
-            mapMarkers.forEach(m => leafletMap.removeLayer(m));
-            mapMarkers = [];
-            polylineLayers.forEach(l => leafletMap.removeLayer(l));
-            polylineLayers = [];
-
-            const startStop = allStopsData.find(s => s.id === startId);
-            const endStop = allStopsData.find(s => s.id === endId);
-            if (!startStop || !endStop || !startStop.lat || !startStop.lng || !endStop.lat || !endStop.lng) return;
-
-            const startLine = (startStop.line || 'red').toLowerCase();
-            const endLine = (endStop.line || 'red').toLowerCase();
-
-            const redStopsList = allStopsData.filter(s => s.line === 'red' && s.lat && s.lng);
-            const greenStopsList = allStopsData.filter(s => s.line === 'green' && s.lat && s.lng);
-
-            if (startLine === endLine) {
-                const lineStops = startLine === 'red' ? redStopsList : greenStopsList;
-                const startIndex = lineStops.findIndex(s => s.id === startId);
-                const endIndex = lineStops.findIndex(s => s.id === endId);
-
-                if (startIndex !== -1 && endIndex !== -1) {
-                    const step = startIndex <= endIndex ? 1 : -1;
-        // HÀM VẼ LỘ TRÌNH ĐI TỪ A ĐẾN B Y HỆT GOOGLE MAPS CHUẨN XÁC
         function updateMapRoute(startId, endId) {
             if (!leafletMap || allStopsData.length === 0) return;
 
@@ -502,9 +474,7 @@
                     polylineLayers.push(polyRoute);
                 }
             } else {
-                // Khác tuyến (Red Line <-> Green Line): Chuyển tuyến trực tiếp tại khu vực Abbey St / O'Connell đúng thực tế
                 if (startLine === 'red') {
-                    // Chặng 1: Start đến Abbey Street trên Red Line
                     const sIdx = redStopsList.findIndex(s => s.id === startId);
                     const abbIdx = redStopsList.findIndex(s => s.id === 'ABB');
                     if (sIdx !== -1 && abbIdx !== -1) {
@@ -516,18 +486,14 @@
                         polylineLayers.push(L.polyline(coords1, {color: '#ef4444', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
 
-                    // Chặng chuyển tuyến ngắn gọn tại trung tâm (Abbey St sang nhánh Green Line gần nhất)
                     const transferCoords = [
-                        [53.3486, -6.2593], // Abbey Street (Red)
-                        [53.3500, -6.2595]  // Kết nối ngắn qua trạm Green Line trung tâm
+                        [53.3486, -6.2593],
+                        [53.3500, -6.2595]
                     ];
                     polylineLayers.push(L.polyline(transferCoords, {color: '#10b981', weight: 4.5, opacity: 0.95, dashArray: '5, 5'}).addTo(leafletMap));
 
-                    // Chặng 2: Từ trung tâm đến End trên Green Line
-                    const stpIdx = greenStopsList.findIndex(s => s.id === 'STS'); // hoặc trạm gần nhất
                     const eIdx = greenStopsList.findIndex(s => s.id === endId);
                     if (eIdx !== -1) {
-                        // Nối từ khu vực trung tâm (Abbey/O'Connell) đến trạm đích trên Green Line
                         const coords2 = [
                             [53.3500, -6.2595],
                             [parseFloat(greenStopsList[eIdx].lat), parseFloat(greenStopsList[eIdx].lng)]
@@ -535,7 +501,6 @@
                         polylineLayers.push(L.polyline(coords2, {color: '#10b981', weight: 6, opacity: 0.9}).addTo(leafletMap));
                     }
                 } else {
-                    // Ngược lại từ Green Line sang Red Line
                     const eIdx = redStopsList.findIndex(s => s.id === endId);
                     if (eIdx !== -1) {
                         const coords2 = [
@@ -547,7 +512,6 @@
                 }
             }
 
-            // Hiển thị marker các trạm với icon Pin đích đến 🎯 cho Arrival
             allStopsData.forEach(s => {
                 if (!s.lat || !s.lng) return;
                 const isStart = s.id === startId;
@@ -557,17 +521,15 @@
                 let radiusSize = 5;
 
                 if (isStart) { markerColor = '#ec4899'; radiusSize = 11; }
-                if (isEnd) { markerColor = '#f59e0b'; radiusSize = 12; }
 
                 let circleMarker;
                 if (isEnd) {
-                    // Dùng custom icon hình Pin đích đến cho Arrival
                     circleMarker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                         icon: L.divIcon({
                             className: 'custom-arrival-pin',
-                            html: '<div style="background:#f59e0b; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; border:2.5px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);">📍</div>',
-                            iconSize: [26, 26],
-                            iconAnchor: [13, 13]
+                            html: '<div style="background:#f59e0b; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; border:2.5px solid white; box-shadow:0 4px 12px rgba(0,0,0,0.35);">📍</div>',
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14]
                         })
                     }).addTo(leafletMap);
                 } else {
@@ -733,11 +695,9 @@
                     document.getElementById('weather-stop-select').value = closestStop.id;
                     onStartStopChange();
                     switchTab('map');
-                    alert(`📍 Nearest Luas stop found: ${closestStop.name} (~${(minDistance * 1000).toFixed(0)}m away). Showing on Live Map!`);
                 }
             }, () => {
                 btn.innerText = '📍 My GPS Location';
-                alert('Unable to retrieve your location. Please check browser GPS permissions.');
             });
         }
 
