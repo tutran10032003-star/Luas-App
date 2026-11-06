@@ -221,12 +221,12 @@
                     </div>
                 </div>
 
-                <!-- LIVE BOARD CHẶNG 2 (NẾU CÓ CHUYỂN TUYẾN) -->
+                <!-- LIVE BOARD CHẶNG 2 (HIỂN THỊ ĐÚNG TRẠM ĐẾN / KẾT NỐI) -->
                 <div id="leg2-board-wrapper" class="hidden bg-white rounded-3xl shadow-sm border border-teal-100 overflow-hidden">
                     <div class="bg-teal-700 text-white px-6 py-4 flex items-center justify-between">
                         <div>
-                            <h2 id="leg2-board-stop-name" class="font-bold text-base">Transfer Board</h2>
-                            <p class="text-[11px] text-teal-200">Next connecting line schedule</p>
+                            <h2 id="leg2-board-stop-name" class="font-bold text-base">Arrival Station Schedule</h2>
+                            <p class="text-[11px] text-teal-200">Live arrivals at destination</p>
                         </div>
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-500/30 text-teal-200 border border-teal-400/30">
                             ● Live Board Leg 2
@@ -436,14 +436,15 @@
             document.getElementById('stop-end-select').value = savedEnd;
             document.getElementById('weather-stop-select').value = savedStart;
 
-            fetchForecast(savedStart);
+            fetchTripData(savedStart, savedEnd);
             fetchWeatherForStop(savedStart);
             updateMapRoute(savedStart, savedEnd);
             updateRouteSummary(savedStart, savedEnd);
 
             refreshTimer = setInterval(() => {
                 const currentStart = document.getElementById('stop-start-select').value;
-                if (currentStart) fetchForecast(currentStart, true);
+                const currentEnd = document.getElementById('stop-end-select').value;
+                if (currentStart) fetchTripData(currentStart, currentEnd, true);
             }, 20000);
         });
 
@@ -800,14 +801,13 @@
             document.getElementById('ai-query-input').value = '';
         }
 
-        // AUTO FETCH LIVE SCHEDULE IMMEDIATELY WHEN SELECTION CHANGES
         function onStartStopChange() {
             const startId = document.getElementById('stop-start-select').value;
             const endId = document.getElementById('stop-end-select').value;
             document.getElementById('weather-stop-select').value = startId;
             localStorage.setItem('myLuas_startStop', startId);
             
-            fetchForecast(startId);
+            fetchTripData(startId, endId);
             fetchWeatherForStop(startId);
             updateMapRoute(startId, endId);
             updateRouteSummary(startId, endId);
@@ -818,7 +818,7 @@
             const endId = document.getElementById('stop-end-select').value;
             localStorage.setItem('myLuas_endStop', endId);
             
-            fetchForecast(startId);
+            fetchTripData(startId, endId);
             updateMapRoute(startId, endId);
             updateRouteSummary(startId, endId);
         }
@@ -827,7 +827,7 @@
             const stopId = document.getElementById('weather-stop-select').value;
             document.getElementById('stop-start-select').value = stopId;
             localStorage.setItem('myLuas_startStop', stopId);
-            fetchForecast(stopId, true);
+            fetchTripData(stopId, document.getElementById('stop-end-select').value, true);
             fetchWeatherForStop(stopId);
             updateMapRoute(stopId, document.getElementById('stop-end-select').value);
             updateRouteSummary(stopId, document.getElementById('stop-end-select').value);
@@ -867,9 +867,9 @@
             document.getElementById('weather-icon-lg').innerText = iconEmoji;
         }
 
-        async function fetchForecast(stopId, isBackground = false) {
-            const startStop = allStopsData.find(s => s.id === stopId);
-            const endStop = allStopsData.find(s => s.id === document.getElementById('stop-end-select').value);
+        async function fetchTripData(startId, endId, isBackground = false) {
+            const startStop = allStopsData.find(s => s.id === startId);
+            const endStop = allStopsData.find(s => s.id === endId);
 
             if (!isBackground) {
                 document.getElementById('directions-container').innerHTML = `
@@ -880,16 +880,17 @@
             }
 
             try {
-                const response = await fetch(`${BASE_URL}/forecast?stop=${stopId}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                renderForecast(data, 'directions-container', 'board-stop-name');
+                // Fetch Leg 1 (Departure Station)
+                const res1 = await fetch(`${BASE_URL}/forecast?stop=${startId}`);
+                if (!res1.ok) throw new Error(`HTTP error! status: ${res1.status}`);
+                const data1 = await res1.json();
+                renderForecast(data1, 'directions-container', 'board-stop-name');
 
                 const leg2Wrapper = document.getElementById('leg2-board-wrapper');
                 if (startStop && endStop && startStop.line !== endStop.line) {
                     leg2Wrapper.classList.remove('hidden');
-                    const transferStopId = endStop.line === 'green' ? 'STS' : 'ABB';
-                    const res2 = await fetch(`${BASE_URL}/forecast?stop=${transferStopId}`);
+                    // Fetch Leg 2 đúng theo trạm đích (Arrival Station) mà bồ đã chọn
+                    const res2 = await fetch(`${BASE_URL}/forecast?stop=${endId}`);
                     const data2 = await res2.json();
                     renderForecast(data2, 'leg2-directions-container', 'leg2-board-stop-name');
                 } else {
