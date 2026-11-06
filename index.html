@@ -139,16 +139,16 @@
                     AI Active
                 </div>
             </div>
-            <h3 class="font-bold text-emerald-900 text-base mb-1">Luas Buddy</h3>
-            <p class="text-xs text-emerald-700 font-semibold mb-3">Your cute Dublin travel companion! 🚋</p>
+            <h3 class="font-bold text-emerald-900 text-base mb-1">Meet Buddy</h3>
+            <p class="text-xs text-emerald-700 font-semibold mb-3">Your friendly Ireland travel companion</p>
 
             <section class="buddy-panel w-full rounded-3xl overflow-hidden text-left">
                 <div class="buddy-header px-3 py-2.5 flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xl">🚋</span>
-                        <div><p class="font-extrabold text-xs">Meet Buddy</p><p class="text-[9px] font-semibold opacity-80">● Ready to help</p></div>
+                        <div><p class="font-extrabold text-xs">Buddy Assistant</p><p class="text-[9px] font-semibold opacity-80">● Ready to help</p></div>
                     </div>
-                    <!-- Sub-tabs for Buddy Panel -->
+                    <!-- Sub-tabs matching user's design reference -->
                     <div class="flex bg-white/70 p-0.5 rounded-xl border border-amber-200">
                         <button onclick="switchBuddySubTab('chat')" id="subtab-chat" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shadow-sm transition">💬 Ask</button>
                         <button onclick="switchBuddySubTab('explore')" id="subtab-explore" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-900 hover:bg-white/50 transition">🗺️ Explore</button>
@@ -158,14 +158,17 @@
                 <!-- SUB-TAB 1: ASK BUDDY (CHAT) -->
                 <div id="buddy-sub-chat" class="p-3 space-y-3">
                     <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
-                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Buddy. Ask me anything about attractions, food, weather, or trip planning!</div>
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Buddy. Where would you like to explore today?</div>
                     </div>
 
                     <!-- Quick suggestion chips -->
-                    <div class="flex flex-wrap gap-1 pt-1">
-                        <button onclick="sendQuickPrompt('What can I do in Dublin?')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🏛️ Dublin Things to Do</button>
-                        <button onclick="sendQuickPrompt('Plan a day in Dublin')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🧭 Dublin 1-Day Trip</button>
-                        <button onclick="sendQuickPrompt('Famous Irish food')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🍲 Irish Food</button>
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800">Try asking:</p>
+                        <div class="flex flex-wrap gap-1">
+                            <button onclick="sendQuickPrompt('What can I do in Dublin?')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🏛️ Dublin Things to Do</button>
+                            <button onclick="sendQuickPrompt('Plan a day in Dublin')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🧭 Dublin 1-Day Trip</button>
+                            <button onclick="sendQuickPrompt('Famous Irish food')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🍲 Irish Food</button>
+                        </div>
                     </div>
 
                     <!-- CHAT INPUT -->
@@ -175,11 +178,11 @@
                     </form>
                 </div>
 
-                <!-- SUB-TAB 2: EXPLORE IRELAND (TOURS, FOOD & ATTRACTIONS) -->
+                <!-- SUB-TAB 2: EXPLORE IRELAND (TOURS, FOOD WITH IMAGES & ATTRACTIONS) -->
                 <div id="buddy-sub-explore" class="p-3 space-y-3 hidden">
                     <!-- REGION / COUNTY SELECTOR -->
                     <div class="bg-emerald-50/60 p-2.5 rounded-2xl border border-emerald-100 space-y-1.5">
-                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Select County</label>
+                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Select County / Region</label>
                         <select id="county-select" onchange="onCountyChange()" class="w-full px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-emerald-200 bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                             <option value="Dublin">Dublin County</option>
                             <option value="Cork">Cork County</option>
@@ -197,15 +200,15 @@
                     <div>
                         <div class="flex items-center justify-between mb-1">
                             <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">📍 Top Attractions</p>
-                            <span class="text-[9px] text-slate-400">Tap for Luas route</span>
+                            <span class="text-[9px] text-slate-400">Tap for route</span>
                         </div>
                         <div id="buddy-attraction-list" class="grid grid-cols-1 gap-1.5"></div>
                     </div>
 
-                    <!-- FOOD TOUR / SPECIALTIES SECTION -->
+                    <!-- FOOD SECTION WITH REAL IMAGES -->
                     <div>
-                        <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">🍽️ Local Food & Specialties</p>
-                        <div id="buddy-food-list" class="grid grid-cols-1 gap-1.5"></div>
+                        <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">🍽️ Local Specialties & Food</p>
+                        <div id="buddy-food-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
 
                     <!-- CURATED TOURS SECTION -->
@@ -232,7 +235,7 @@
                     </div>
                 </div>
 
-                <div class="px-3 pb-2">
+                <div class="px-3 pb-2 pt-1">
                     <p class="text-[9px] text-slate-500 text-center">Ireland Travel Assistant · 32 Counties</p>
                 </div>
             </section>
@@ -486,16 +489,16 @@
 
         const countyFoods = {
             "Dublin": [
-                { name: "Dublin Coddle[cite: 3]", desc: "Traditional stew with sausages, bacon, potatoes & onions[cite: 3].", icon: "🍲" }
+                { name: "Dublin Coddle", desc: "Traditional stew with sausages, bacon, potatoes & onions.", img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=150&auto=format&fit=crop&q=80" }
             ],
             "Galway": [
-                { name: "Galway Oysters & Chowder[cite: 3]", desc: "Fresh Atlantic seafood and world-famous local oysters[cite: 3].", icon: "🦪" }
+                { name: "Galway Oysters & Chowder", desc: "Fresh Atlantic seafood and world-famous local oysters.", img: "https://images.unsplash.com/photo-1532336414038-cf19250c5756?w=150&auto=format&fit=crop&q=80" }
             ],
             "Cork": [
-                { name: "Spiced Beef[cite: 3]", desc: "Traditional Cork cured spiced beef specialty[cite: 3].", icon: "🥩" }
+                { name: "Spiced Beef", desc: "Traditional Cork cured spiced beef specialty.", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&auto=format&fit=crop&q=80" }
             ],
             "Waterford": [
-                { name: "Waterford Blaa[cite: 3]", desc: "Soft, white doughy traditional breakfast roll[cite: 3].", icon: "🍞" }
+                { name: "Waterford Blaa", desc: "Soft, white doughy traditional breakfast roll.", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&auto=format&fit=crop&q=80" }
             ]
         };
 
@@ -784,7 +787,7 @@
             renderCountyExploreData(county);
         }
 
-        // Render dữ liệu Explore theo County (Attractions & Food)
+        // Render dữ liệu Explore theo County (Attractions & Food with real images)
         function renderCountyExploreData(county) {
             const attrList = document.getElementById('buddy-attraction-list');
             const foodList = document.getElementById('buddy-food-list');
@@ -812,14 +815,14 @@
                 attrList.appendChild(button);
             });
 
-            // Render foods
-            const foods = countyFoods[county] || [{ name: "Irish Stew & Soda Bread[cite: 3]", desc: "Classic Irish comforting stew.", icon: "🍲" }];
+            // Render foods with real images
+            const foods = countyFoods[county] || [{ name: "Irish Stew & Soda Bread", desc: "Classic Irish comforting stew.", img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=150&auto=format&fit=crop&q=80" }];
             foodList.innerHTML = '';
             foods.forEach(f => {
                 const div = document.createElement('div');
-                div.className = 'buddy-item-card flex items-center gap-2 text-xs w-full bg-amber-50/40';
+                div.className = 'buddy-item-card flex items-center gap-2.5 text-xs w-full bg-amber-50/40';
                 div.innerHTML = `
-                    <span class="text-base">${f.icon}</span>
+                    <img src="${f.img}" alt="${f.name}" class="w-10 h-10 rounded-lg object-cover border border-amber-200 flex-shrink-0 shadow-sm" />
                     <span class="min-w-0 flex-1">
                         <span class="block font-extrabold text-amber-950">${f.name}</span>
                         <span class="block text-[9px] text-slate-500 truncate">${f.desc}</span>
@@ -854,9 +857,9 @@
             } else if (q.includes('plan') || q.includes('day') || q.includes('trip') || q.includes('dublin in 1 day')) {
                 loadCuratedTour('dublin1day');
             } else if (q.includes('food') || q.includes('eat') || q.includes('coddle') || q.includes('chowder')) {
-                buddyAddMessage("🍲 Famous Irish Food Recommendations:\n• Dublin: Dublin Coddle (sausages, bacon, potatoes)[cite: 3]\n• Galway: Fresh Oysters & Seafood Chowder[cite: 3]\n• Cork: Spiced Beef[cite: 3]\n• Waterford: Traditional Blaa roll[cite: 3]");
+                buddyAddMessage("🍲 Famous Irish Food Recommendations:\n• Dublin: Dublin Coddle (sausages, bacon, potatoes)\n• Galway: Fresh Oysters & Seafood Chowder\n• Cork: Spiced Beef specialty\n• Waterford: Traditional Blaa roll");
             } else if (q.includes('weather') || q.includes('wear') || q.includes('jacket')) {
-                buddyAddMessage("🌦️ You can check the exact temperature, wind speed and outfit recommendations instantly in the Weather tab above! It updates in real-time.");
+                buddyAddMessage("🌦️ You can check exact temperature, wind speed and outfit recommendations instantly in the Weather tab above! It updates in real-time.");
             } else {
                 buddyAddMessage("I'm here to help! You can ask about Dublin attractions, Irish food, weather, or tap the 'Explore' tab to check out curated day trips!");
             }
@@ -867,12 +870,11 @@
             switchBuddySubTab('chat');
             if (tourKey === 'dublin1day') {
                 buddyAddMessage("🧭 Dublin in 1 Day - Curated Itinerary:\n1️⃣ 09:00 - Trinity College (Historic campus & Book of Kells)\n2️⃣ 10:30 - St Stephen's Green (Relaxing Victorian park stroll)\n3️⃣ 12:00 - Guinness Storehouse (Famous brewing experience)\n4️⃣ 15:00 - Temple Bar (Cultural pubs & live music)");
-                // Tự động set điểm đi tới đến cho tour Dublin
                 document.getElementById('stop-start-select').value = 'TPT';
                 document.getElementById('stop-end-select').value = 'STS';
                 onEndStopChange();
             } else if (tourKey === 'foodtour') {
-                buddyAddMessage("🦀 Irish Food Tour Highlights:\n• Try Dublin Coddle in central pubs[cite: 3]\n• Enjoy fresh Galway Oysters by the coast[cite: 3]\n• Taste Cork's traditional Spiced Beef[cite: 3]");
+                buddyAddMessage("🦀 Irish Food Tour Highlights:\n• Try Dublin Coddle in central pubs\n• Enjoy fresh Galway Oysters by the coast\n• Taste Cork's traditional Spiced Beef");
             }
         }
 
