@@ -50,11 +50,10 @@
         .buddy-panel { background: linear-gradient(145deg,#fff8df 0%,#f0fffa 100%); border: 2px solid #a7f3d0; box-shadow: 0 8px 24px rgba(16,185,129,.10); }
         .buddy-header { background: linear-gradient(110deg,#f7c85c,#f5a65b); color:#5b351c; }
         .buddy-message { border-radius: 18px 18px 18px 5px; background:#fff; border:1px solid #c8f3e2; }
-        .buddy-attraction { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
-        .buddy-attraction:hover { background:#fff4d6; border-color:#f6c65d; }
+        .buddy-item-card { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
+        .buddy-item-card:hover { background:#fff4d6; border-color:#f6c65d; }
         #buddy-chat-log { max-height:220px; overflow-y:auto; }
 
-        /* RESPONSIVE MEDIA QUERIES FOR MOBILE */
         @media (max-width: 768px) {
             header .max-w-5xl {
                 flex-direction: column;
@@ -119,7 +118,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT & AI CHAT -->
+        <!-- CỘT TRÁI: MASCOT & AI CHAT (CHIA 2 TAB: ASK BUDDY & EXPLORE IRELAND) -->
         <div class="md:col-span-1 bg-white p-4 sm:p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center md:sticky md:top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-24 h-24 sm:w-28 sm:h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -144,22 +143,44 @@
             <p class="text-xs text-emerald-700 font-semibold mb-3">Your cute Dublin travel companion! 🚋</p>
 
             <section class="buddy-panel w-full rounded-3xl overflow-hidden text-left">
-                <div class="buddy-header px-4 py-3 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">🚋</span>
-                        <div><p class="font-extrabold text-sm">Ask Luas Buddy</p><p class="text-[10px] font-semibold opacity-80">● Ready to help</p></div>
+                <div class="buddy-header px-3 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xl">🚋</span>
+                        <div><p class="font-extrabold text-xs">Meet Buddy</p><p class="text-[9px] font-semibold opacity-80">● Ready to help</p></div>
                     </div>
-                    <button onclick="resetBuddyChat()" class="text-[10px] font-bold bg-white/70 hover:bg-white px-3 py-2 rounded-full">New chat ↻</button>
+                    <!-- Sub-tabs for Buddy Panel -->
+                    <div class="flex bg-white/70 p-0.5 rounded-xl border border-amber-200">
+                        <button onclick="switchBuddySubTab('chat')" id="subtab-chat" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shadow-sm transition">💬 Ask</button>
+                        <button onclick="switchBuddySubTab('explore')" id="subtab-explore" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-900 hover:bg-white/50 transition">🗺️ Explore</button>
+                    </div>
                 </div>
-                <div class="p-3 space-y-3">
+
+                <!-- SUB-TAB 1: ASK BUDDY (CHAT) -->
+                <div id="buddy-sub-chat" class="p-3 space-y-3">
                     <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
-                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! Pick an attraction below for smart route & live weather briefing!</div>
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Buddy. Ask me anything about attractions, food, weather, or trip planning!</div>
                     </div>
 
+                    <!-- Quick suggestion chips -->
+                    <div class="flex flex-wrap gap-1 pt-1">
+                        <button onclick="sendQuickPrompt('What can I do in Dublin?')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🏛️ Dublin Things to Do</button>
+                        <button onclick="sendQuickPrompt('Plan a day in Dublin')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🧭 Dublin 1-Day Trip</button>
+                        <button onclick="sendQuickPrompt('Famous Irish food')" class="bg-white hover:bg-amber-100 text-[10px] font-bold text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200 transition">🍲 Irish Food</button>
+                    </div>
+
+                    <!-- CHAT INPUT -->
+                    <form class="flex gap-2 pt-2 border-t border-dashed border-emerald-200" onsubmit="event.preventDefault(); buddySendMessage();">
+                        <input type="text" id="ai-query-input" placeholder="Ask Buddy anything..." class="min-w-0 flex-1 px-3 py-2 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
+                        <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-3.5 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
+                    </form>
+                </div>
+
+                <!-- SUB-TAB 2: EXPLORE IRELAND (TOURS, FOOD & ATTRACTIONS) -->
+                <div id="buddy-sub-explore" class="p-3 space-y-3 hidden">
                     <!-- REGION / COUNTY SELECTOR -->
-                    <div class="bg-emerald-50/60 p-2.5 rounded-2xl border border-emerald-100 space-y-2">
-                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Select County / Region</label>
-                        <select id="county-select" onchange="onCountyChange()" class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-emerald-200 bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <div class="bg-emerald-50/60 p-2.5 rounded-2xl border border-emerald-100 space-y-1.5">
+                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Select County</label>
+                        <select id="county-select" onchange="onCountyChange()" class="w-full px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-emerald-200 bg-white text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                             <option value="Dublin">Dublin County</option>
                             <option value="Cork">Cork County</option>
                             <option value="Galway">Galway County</option>
@@ -172,16 +193,46 @@
                         </select>
                     </div>
 
+                    <!-- ATTRACTIONS SECTION -->
                     <div>
-                        <div class="flex items-center justify-between mb-1.5"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions in Region</p><span class="text-[9px] text-slate-400">Tap for route & weather</span></div>
-                        <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2"></div>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">📍 Top Attractions</p>
+                            <span class="text-[9px] text-slate-400">Tap for Luas route</span>
+                        </div>
+                        <div id="buddy-attraction-list" class="grid grid-cols-1 gap-1.5"></div>
                     </div>
 
-                    <!-- CHAT INPUT PLACED AT THE BOTTOM -->
-                    <form class="flex gap-2 pt-2 border-t border-dashed border-emerald-200" onsubmit="event.preventDefault(); buddySendMessage();">
-                        <input type="text" id="ai-query-input" placeholder="Ask about attractions..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
-                        <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
-                    </form>
+                    <!-- FOOD TOUR / SPECIALTIES SECTION -->
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">🍽️ Local Food & Specialties</p>
+                        <div id="buddy-food-list" class="grid grid-cols-1 gap-1.5"></div>
+                    </div>
+
+                    <!-- CURATED TOURS SECTION -->
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800 mb-1">🧭 Curated Day Trips</p>
+                        <div class="space-y-1.5">
+                            <button type="button" onclick="loadCuratedTour('dublin1day')" class="buddy-item-card flex items-center gap-2 text-xs w-full">
+                                <span class="text-lg">🏙️</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block font-extrabold text-emerald-950">Dublin in 1 Day</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Trinity ➔ St Stephen's ➔ Guinness</span>
+                                </span>
+                                <span class="text-emerald-600 font-bold">›</span>
+                            </button>
+                            <button type="button" onclick="loadCuratedTour('foodtour')" class="buddy-item-card flex items-center gap-2 text-xs w-full">
+                                <span class="text-lg">🦀</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block font-extrabold text-emerald-950">Irish Food Tour</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Coddle, Chowder & Local Delights</span>
+                                </span>
+                                <span class="text-emerald-600 font-bold">›</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-3 pb-2">
                     <p class="text-[9px] text-slate-500 text-center">Ireland Travel Assistant · 32 Counties</p>
                 </div>
             </section>
@@ -403,42 +454,48 @@
                 { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
                 { name: "Guinness Storehouse", lat: 53.3419, lng: -6.2867, desc: "Famous brewery experience detailing the history of Guinness.", icon: "🍺", stopId: "HEU" },
                 { name: "St Stephen's Green", lat: 53.3382, lng: -6.2625, desc: "Victorian public park located in the heart of Dublin's city centre.", icon: "🌳", stopId: "STS" },
-                { name: "Temple Bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" },
-                { name: "Phoenix Park", lat: 53.3558, lng: -6.3298, desc: "One of the largest enclosed public parks in any European capital.", icon: "🦌", stopId: "MUS" }
+                { name: "Temple Bar", lat: 53.3455, lng: -6.2642, desc: "Cultural quarter known for its cobbled streets, pubs, and live music.", icon: "🎸", stopId: "JER" }
             ],
             "Cork": [
                 { name: "English Market", lat: 51.8979, lng: -8.4746, desc: "Famous 18th-century covered food market in the heart of Cork city.", icon: "🍎", stopId: "STS" },
-                { name: "Cork City Gaol", lat: 51.9028, lng: -8.5005, desc: "Magnificent nineteenth-century prison showing atmospheric cell history.", icon: "🧱", stopId: "HEU" },
-                { name: "Blarney Stone", lat: 51.9284, lng: -8.5721, desc: "Legendary stone kissed to gain the gift of eloquence at Blarney Castle.", icon: "🏰", stopId: "STS" },
-                { name: "St Fin Barre's Cathedral", lat: 51.8943, lng: -8.4835, desc: "Stunning French Gothic-style cathedral with gorgeous spires.", icon: "⛪", stopId: "STS" }
+                { name: "Blarney Stone", lat: 51.9284, lng: -8.5721, desc: "Legendary stone kissed to gain the gift of eloquence at Blarney Castle.", icon: "🏰", stopId: "STS" }
             ],
             "Galway": [
                 { name: "Eyre Square", lat: 53.2743, lng: -9.0490, desc: "Popular central public park and gathering space in Galway city.", icon: "🌳", stopId: "STS" },
                 { name: "Spanish Arch", lat: 53.2704, lng: -9.0558, desc: "Historic extension of the 16th-century town walls by the Corrib river.", icon: "🌊", stopId: "STS" }
             ],
             "Kerry": [
-                { name: "Ring of Kerry", lat: 51.9244, lng: -9.5700, desc: "World-renowned scenic driving route around the Iveragh Peninsula.", icon: "🚗", stopId: "STS" },
-                { name: "Killarney National Park", lat: 52.0223, lng: -9.5122, desc: "Ireland's oldest national park featuring lakes, mountains, and Muckross House.", icon: "🌲", stopId: "STS" }
+                { name: "Ring of Kerry", lat: 51.9244, lng: -9.5700, desc: "World-renowned scenic driving route around the Iveragh Peninsula.", icon: "🚗", stopId: "STS" }
             ],
             "Clare": [
-                { name: "Cliffs of Moher", lat: 52.9715, lng: -9.4265, desc: "Majestic sheer vertical cliffs dropping into the Atlantic Ocean.", icon: "🌊", stopId: "STS" },
-                { name: "The Burren", lat: 53.1118, lng: -9.1314, desc: "Unique karst landscape with glaciated limestone pavement and rare flora.", icon: "⛰️", stopId: "STS" }
+                { name: "Cliffs of Moher", lat: 52.9715, lng: -9.4265, desc: "Majestic sheer vertical cliffs dropping into the Atlantic Ocean.", icon: "🌊", stopId: "STS" }
             ],
             "Limerick": [
-                { name: "King John's Castle", lat: 52.6685, lng: -8.6267, desc: "13th-century imposing Norman castle located on King's Island by the Shannon.", icon: "🏰", stopId: "STS" },
-                { name: "Limerick Milk Market", lat: 52.6635, lng: -8.6252, desc: "Historic open-air market showcasing artisan foods, cheeses and crafts.", icon: "🧀", stopId: "STS" }
+                { name: "King John's Castle", lat: 52.6685, lng: -8.6267, desc: "13th-century imposing Norman castle located on King's Island.", icon: "🏰", stopId: "STS" }
             ],
             "Kilkenny": [
-                { name: "Kilkenny Castle", lat: 52.6517, lng: -7.2492, desc: "Imposing medieval castle built in 1195 set in expansive parklands.", icon: "🏰", stopId: "STS" },
-                { name: "Smithwick's Experience", lat: 52.6534, lng: -7.2555, desc: "Historic brewery tour of Ireland's oldest ale maker.", icon: "🍺", stopId: "STS" }
+                { name: "Kilkenny Castle", lat: 52.6517, lng: -7.2492, desc: "Imposing medieval castle built in 1195 set in expansive parklands.", icon: "🏰", stopId: "STS" }
             ],
             "Donegal": [
-                { name: "Slieve League Cliffs", lat: 54.6293, lng: -8.6833, desc: "Some of the highest and most spectacular marine cliffs in Europe.", icon: "⛰️", stopId: "STS" },
-                { name: "Glenveagh National Park", lat: 55.0244, lng: -8.0444, desc: "Remote wilderness sanctuary with a picturesque castle and rugged mountains.", icon: "🌲", stopId: "STS" }
+                { name: "Slieve League Cliffs", lat: 54.6293, lng: -8.6833, desc: "Some of the highest and most spectacular marine cliffs in Europe.", icon: "⛰️", stopId: "STS" }
             ],
             "Waterford": [
-                { name: "Reginald's Tower", lat: 52.2625, lng: -7.1042, desc: "Ireland's oldest civic building, housing Viking treasures.", icon: "🗼", stopId: "STS" },
-                { name: "Waterford Crystal Visitor Centre", lat: 52.2618, lng: -7.1082, desc: "Famous crystal showroom and factory tour in the Viking Triangle.", icon: "💎", stopId: "STS" }
+                { name: "Reginald's Tower", lat: 52.2625, lng: -7.1042, desc: "Ireland's oldest civic building, housing Viking treasures.", icon: "🗼", stopId: "STS" }
+            ]
+        };
+
+        const countyFoods = {
+            "Dublin": [
+                { name: "Dublin Coddle[cite: 3]", desc: "Traditional stew with sausages, bacon, potatoes & onions[cite: 3].", icon: "🍲" }
+            ],
+            "Galway": [
+                { name: "Galway Oysters & Chowder[cite: 3]", desc: "Fresh Atlantic seafood and world-famous local oysters[cite: 3].", icon: "🦪" }
+            ],
+            "Cork": [
+                { name: "Spiced Beef[cite: 3]", desc: "Traditional Cork cured spiced beef specialty[cite: 3].", icon: "🥩" }
+            ],
+            "Waterford": [
+                { name: "Waterford Blaa[cite: 3]", desc: "Soft, white doughy traditional breakfast roll[cite: 3].", icon: "🍞" }
             ]
         };
 
@@ -449,7 +506,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             populateStopsDropdowns(allStopsData);
-            renderCountyAttractions('Dublin');
+            renderCountyExploreData('Dublin');
             initLeafletMap();
             startRealtimeClock();
 
@@ -545,6 +602,26 @@
                 weatherTab.classList.remove('hidden');
                 btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
                 fetchWeatherForStop(document.getElementById('weather-stop-select').value);
+            }
+        }
+
+        // Chuyển đổi giữa 2 Tab bên trong khung Buddy: Chat vs Explore
+        function switchBuddySubTab(subTab) {
+            const chatDiv = document.getElementById('buddy-sub-chat');
+            const exploreDiv = document.getElementById('buddy-sub-explore');
+            const btnChat = document.getElementById('subtab-chat');
+            const btnExplore = document.getElementById('subtab-explore');
+
+            if (subTab === 'chat') {
+                chatDiv.classList.remove('hidden');
+                exploreDiv.classList.add('hidden');
+                btnChat.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shadow-sm transition";
+                btnExplore.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-900 hover:bg-white/50 transition";
+            } else {
+                chatDiv.classList.add('hidden');
+                exploreDiv.classList.remove('hidden');
+                btnExplore.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 text-white shadow-sm transition";
+                btnChat.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-900 hover:bg-white/50 transition";
             }
         }
 
@@ -704,28 +781,99 @@
 
         function onCountyChange() {
             const county = document.getElementById('county-select').value;
-            renderCountyAttractions(county);
+            renderCountyExploreData(county);
         }
 
-        function renderCountyAttractions(county) {
-            const list = document.getElementById('buddy-attraction-list');
-            if (!list) return;
+        // Render dữ liệu Explore theo County (Attractions & Food)
+        function renderCountyExploreData(county) {
+            const attrList = document.getElementById('buddy-attraction-list');
+            const foodList = document.getElementById('buddy-food-list');
+            if (!attrList || !foodList) return;
+
+            // Render attractions
             const items = countyAttractions[county] || [];
-            list.innerHTML = '';
+            attrList.innerHTML = '';
             items.forEach(a => {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'buddy-attraction flex items-center gap-2 text-xs w-full';
-                const icon = document.createElement('span'); icon.className = 'text-xl'; icon.textContent = a.icon;
-                const label = document.createElement('span'); label.className = 'min-w-0 flex-1';
-                const title = document.createElement('span'); title.className = 'block font-extrabold text-emerald-950'; title.textContent = a.name;
-                const desc = document.createElement('span'); desc.className = 'block text-[10px] text-slate-500 truncate'; desc.textContent = a.desc;
-                label.append(title, desc);
-                const arrow = document.createElement('span'); arrow.className = 'text-emerald-600 font-bold'; arrow.textContent = '›';
-                button.append(icon, label, arrow);
-                button.addEventListener('click', () => buddyShowAttraction(a));
-                list.appendChild(button);
+                button.className = 'buddy-item-card flex items-center gap-2 text-xs w-full';
+                button.innerHTML = `
+                    <span class="text-base">${a.icon}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block font-extrabold text-emerald-950">${a.name}</span>
+                        <span class="block text-[9px] text-slate-500 truncate">${a.desc}</span>
+                    </span>
+                    <span class="text-emerald-600 font-bold">›</span>
+                `;
+                button.addEventListener('click', () => {
+                    switchBuddySubTab('chat');
+                    buddyShowAttraction(a);
+                });
+                attrList.appendChild(button);
             });
+
+            // Render foods
+            const foods = countyFoods[county] || [{ name: "Irish Stew & Soda Bread[cite: 3]", desc: "Classic Irish comforting stew.", icon: "🍲" }];
+            foodList.innerHTML = '';
+            foods.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'buddy-item-card flex items-center gap-2 text-xs w-full bg-amber-50/40';
+                div.innerHTML = `
+                    <span class="text-base">${f.icon}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block font-extrabold text-amber-950">${f.name}</span>
+                        <span class="block text-[9px] text-slate-500 truncate">${f.desc}</span>
+                    </span>
+                `;
+                foodList.appendChild(div);
+            });
+        }
+
+        // Rule-based chat handler cho các câu hỏi phổ biến
+        function sendQuickPrompt(promptText) {
+            document.getElementById('ai-query-input').value = promptText;
+            buddySendMessage();
+        }
+
+        async function buddySendMessage() {
+            const input = document.getElementById('ai-query-input');
+            const query = input.value.trim();
+            if (!query) return;
+            buddyAddMessage(query, 'user');
+            input.value = '';
+
+            const q = query.toLowerCase();
+            let found = null;
+            for (let c in countyAttractions) {
+                const match = countyAttractions[c].find(a => a.name.toLowerCase().includes(q));
+                if (match) { found = match; break; }
+            }
+
+            if (found) {
+                buddyShowAttraction(found);
+            } else if (q.includes('plan') || q.includes('day') || q.includes('trip') || q.includes('dublin in 1 day')) {
+                loadCuratedTour('dublin1day');
+            } else if (q.includes('food') || q.includes('eat') || q.includes('coddle') || q.includes('chowder')) {
+                buddyAddMessage("🍲 Famous Irish Food Recommendations:\n• Dublin: Dublin Coddle (sausages, bacon, potatoes)[cite: 3]\n• Galway: Fresh Oysters & Seafood Chowder[cite: 3]\n• Cork: Spiced Beef[cite: 3]\n• Waterford: Traditional Blaa roll[cite: 3]");
+            } else if (q.includes('weather') || q.includes('wear') || q.includes('jacket')) {
+                buddyAddMessage("🌦️ You can check the exact temperature, wind speed and outfit recommendations instantly in the Weather tab above! It updates in real-time.");
+            } else {
+                buddyAddMessage("I'm here to help! You can ask about Dublin attractions, Irish food, weather, or tap the 'Explore' tab to check out curated day trips!");
+            }
+        }
+
+        // Load Curated Day Trips
+        function loadCuratedTour(tourKey) {
+            switchBuddySubTab('chat');
+            if (tourKey === 'dublin1day') {
+                buddyAddMessage("🧭 Dublin in 1 Day - Curated Itinerary:\n1️⃣ 09:00 - Trinity College (Historic campus & Book of Kells)\n2️⃣ 10:30 - St Stephen's Green (Relaxing Victorian park stroll)\n3️⃣ 12:00 - Guinness Storehouse (Famous brewing experience)\n4️⃣ 15:00 - Temple Bar (Cultural pubs & live music)");
+                // Tự động set điểm đi tới đến cho tour Dublin
+                document.getElementById('stop-start-select').value = 'TPT';
+                document.getElementById('stop-end-select').value = 'STS';
+                onEndStopChange();
+            } else if (tourKey === 'foodtour') {
+                buddyAddMessage("🦀 Irish Food Tour Highlights:\n• Try Dublin Coddle in central pubs[cite: 3]\n• Enjoy fresh Galway Oysters by the coast[cite: 3]\n• Taste Cork's traditional Spiced Beef[cite: 3]");
+            }
         }
 
         async function buddyShowAttraction(attraction) {
@@ -791,28 +939,8 @@
             }
         }
 
-        function buddySendMessage() {
-            const input = document.getElementById('ai-query-input');
-            const query = input.value.trim();
-            if (!query) return;
-            buddyAddMessage(query, 'user');
-            input.value = '';
-
-            const q = query.toLowerCase();
-            let found = null;
-            for (let c in countyAttractions) {
-                const match = countyAttractions[c].find(a => a.name.toLowerCase().includes(q));
-                if (match) { found = match; break; }
-            }
-            if (found) {
-                buddyShowAttraction(found);
-            } else {
-                buddyAddMessage("I found your query. Tap any attraction in the county list above to get an instant route draft and live weather info!");
-            }
-        }
-
         function resetBuddyChat() {
-            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Pick an attraction below.</div>';
+            document.getElementById('buddy-chat-log').innerHTML = '<div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hello again! Ask me anything or explore tours.</div>';
             document.getElementById('ai-query-input').value = '';
         }
 
