@@ -50,8 +50,6 @@
         .buddy-panel { background: linear-gradient(145deg,#fff8df 0%,#f0fffa 100%); border: 2px solid #a7f3d0; box-shadow: 0 8px 24px rgba(16,185,129,.10); }
         .buddy-header { background: linear-gradient(110deg,#f7c85c,#f5a65b); color:#5b351c; }
         .buddy-message { border-radius: 18px 18px 18px 5px; background:#fff; border:1px solid #c8f3e2; }
-        .buddy-chip { border:2px solid #75d8c6; background:#fff; border-radius:18px; text-align:left; padding:10px 12px; box-shadow:0 3px 0 #b9eee2; transition:transform .15s, box-shadow .15s; }
-        .buddy-chip:hover { transform:translateY(-2px); box-shadow:0 5px 0 #b9eee2; }
         .buddy-attraction { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
         .buddy-attraction:hover { background:#fff4d6; border-color:#f6c65d; }
         #buddy-chat-log { max-height:220px; overflow-y:auto; }
@@ -94,7 +92,7 @@
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
-        <!-- CỘT TRÁI: MASCOT VỚI CẢM XÚC THAY ĐỔI THEO THỜI TIẾT -->
+        <!-- CỘT TRÁI: MASCOT & AI CHAT -->
         <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
             <div class="relative mb-3">
                 <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
@@ -128,7 +126,7 @@
                 </div>
                 <div class="p-3 space-y-3">
                     <div id="buddy-chat-log" class="space-y-2" aria-live="polite">
-                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! I'm Luas Buddy. Pick a county & attraction below to explore Ireland!</div>
+                        <div class="buddy-message p-3 text-xs text-slate-700 leading-relaxed">👋 Hi! Pick a county & attraction below to instantly explore on the map!</div>
                     </div>
 
                     <!-- REGION / COUNTY SELECTOR -->
@@ -148,7 +146,7 @@
                     </div>
 
                     <div>
-                        <div class="flex items-center justify-between mb-1.5"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions in Region</p><span class="text-[9px] text-slate-400">Tap to zoom map</span></div>
+                        <div class="flex items-center justify-between mb-1.5"><p class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-800">Attractions in Region</p><span class="text-[9px] text-slate-400">Tap to auto-jump map</span></div>
                         <div id="buddy-attraction-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
 
@@ -157,7 +155,7 @@
                         <input type="text" id="ai-query-input" placeholder="Ask about attractions..." class="min-w-0 flex-1 px-3 py-2.5 text-xs rounded-full border-2 border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white font-semibold">
                         <button type="submit" class="bg-[#ff786e] hover:bg-[#f26359] text-white px-4 py-2 rounded-full text-xs font-extrabold shadow-[0_3px_0_#d94c45]">Send ➤</button>
                     </form>
-                    <p class="text-[9px] text-slate-500 text-center">Ireland Travel Assistant · Explore 32 Counties</p>
+                    <p class="text-[9px] text-slate-500 text-center">Ireland Travel Assistant · 32 Counties</p>
                 </div>
             </section>
         </div>
@@ -204,7 +202,7 @@
                     <span>⚠️</span> <span id="service-message-text">Normal service operating.</span>
                 </div>
 
-                <!-- LIVE BOARD CHẶNG 1 (ĐI HÀNH TRÌNH KHỞI HÀNH) -->
+                <!-- LIVE BOARD CHẶNG 1 -->
                 <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden">
                     <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
                         <div>
@@ -223,7 +221,7 @@
                     </div>
                 </div>
 
-                <!-- LIVE BOARD CHẶNG 2 (NẾU CÓ CHUYỂN TUYẾN - HIỂN THỊ TÀU TUYẾN TIẾP THEO) -->
+                <!-- LIVE BOARD CHẶNG 2 (NẾU CÓ CHUYỂN TUYẾN) -->
                 <div id="leg2-board-wrapper" class="hidden bg-white rounded-3xl shadow-sm border border-teal-100 overflow-hidden">
                     <div class="bg-teal-700 text-white px-6 py-4 flex items-center justify-between">
                         <div>
@@ -235,9 +233,7 @@
                         </span>
                     </div>
 
-                    <div id="leg2-directions-container" class="p-5 space-y-4">
-                        <!-- Tàu tuyến tiếp theo sẽ hiện ở đây -->
-                    </div>
+                    <div id="leg2-directions-container" class="p-5 space-y-4"></div>
                 </div>
             </div>
 
@@ -377,7 +373,6 @@
             { id: 'BRI', name: 'Brides Glen', line: 'green', lat: 53.2382, lng: -6.1485 }
         ];
 
-        // Comprehensive Ireland Attractions across Counties
         const countyAttractions = {
             "Dublin": [
                 { name: "Trinity College", lat: 53.3438, lng: -6.2546, desc: "Historic university founded in 1592, home of the Book of Kells.", icon: "🏛️", stopId: "STS" },
@@ -394,8 +389,7 @@
             ],
             "Galway": [
                 { name: "Eyre Square", lat: 53.2743, lng: -9.0490, desc: "Popular central public park and gathering space in Galway city.", icon: "🌳", stopId: "STS" },
-                { name: "Spanish Arch", lat: 53.2704, lng: -9.0558, desc: "Historic extension of the 16th-century town walls by the Corrib river.", icon: "🌊", stopId: "STS" },
-                { name: "Cliffs of Moher (Day trip)", lat: 52.9715, lng: -9.4265, desc: "Breathtaking coastal sea cliffs located nearby in Clare/Galway region.", icon: "🦅", stopId: "STS" }
+                { name: "Spanish Arch", lat: 53.2704, lng: -9.0558, desc: "Historic extension of the 16th-century town walls by the Corrib river.", icon: "🌊", stopId: "STS" }
             ],
             "Kerry": [
                 { name: "Ring of Kerry", lat: 51.9244, lng: -9.5700, desc: "World-renowned scenic driving route around the Iveragh Peninsula.", icon: "🚗", stopId: "STS" },
@@ -457,9 +451,7 @@
             function updateClock() {
                 const now = new Date();
                 const clockEl = document.getElementById('realtime-clock');
-                if (clockEl) {
-                    clockEl.innerText = `| 🕒 ${now.toLocaleTimeString()}`;
-                }
+                if (clockEl) clockEl.innerText = `| 🕒 ${now.toLocaleTimeString()}`;
             }
             updateClock();
             setInterval(updateClock, 1000);
@@ -523,7 +515,7 @@
             } else if (tabName === 'map') {
                 mapTab.classList.remove('hidden');
                 btnMap.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
-                setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 200);
+                setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 150);
             } else if (tabName === 'weather') {
                 weatherTab.classList.remove('hidden');
                 btnWeather.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm";
@@ -609,8 +601,7 @@
                 const isStart = s.id === startId;
                 const isEnd = s.id === endId;
                 
-                let radiusSize = isStart ? 10 : 0;
-                if (radiusSize === 0 && !isEnd) return; // Chỉ hiện Departure và Arrival Pin để bản đồ cực kỳ sạch sẽ
+                if (!isStart && !isEnd) return;
 
                 let circleMarker;
                 if (isEnd) {
@@ -717,7 +708,6 @@
                 if (closestStop) {
                     document.getElementById('stop-start-select').value = closestStop.id;
                     onStartStopChange();
-                    switchTab('map');
                 }
             }, () => {
                 btn.innerText = '📍 My GPS Location';
@@ -775,12 +765,13 @@
         function buddyShowAttraction(attraction) {
             buddyAddMessage(`Tell me about ${attraction.name}`, 'user');
             buddyAddMessage(`${attraction.icon} ${attraction.name}: ${attraction.desc}`);
+            
+            switchTab('map');
             if (leafletMap) {
-                switchTab('map');
                 setTimeout(() => {
                     leafletMap.setView([attraction.lat, attraction.lng], 16);
                     L.popup().setLatLng([attraction.lat, attraction.lng]).setContent(`<b>${attraction.icon} ${attraction.name}</b><br>${attraction.desc}`).openOn(leafletMap);
-                }, 250);
+                }, 150);
             }
         }
 
@@ -800,7 +791,7 @@
             if (found) {
                 buddyShowAttraction(found);
             } else {
-                buddyAddMessage("I found your query, but you can tap the attractions in the county list to zoom directly to them on the Live Map!");
+                buddyAddMessage("I found your query. Tap any attraction in the county list above to auto-jump directly to it on the Live Map!");
             }
         }
 
@@ -809,11 +800,13 @@
             document.getElementById('ai-query-input').value = '';
         }
 
+        // AUTO FETCH LIVE SCHEDULE IMMEDIATELY WHEN SELECTION CHANGES
         function onStartStopChange() {
             const startId = document.getElementById('stop-start-select').value;
             const endId = document.getElementById('stop-end-select').value;
             document.getElementById('weather-stop-select').value = startId;
             localStorage.setItem('myLuas_startStop', startId);
+            
             fetchForecast(startId);
             fetchWeatherForStop(startId);
             updateMapRoute(startId, endId);
@@ -824,6 +817,8 @@
             const startId = document.getElementById('stop-start-select').value;
             const endId = document.getElementById('stop-end-select').value;
             localStorage.setItem('myLuas_endStop', endId);
+            
+            fetchForecast(startId);
             updateMapRoute(startId, endId);
             updateRouteSummary(startId, endId);
         }
@@ -861,11 +856,10 @@
 
             let conditionText = "Clear & Pleasant";
             let iconEmoji = "☀️";
-            let weatherCategory = "warm"; 
 
-            if (precip > 0 || wcode >= 50) { weatherCategory = "rain"; conditionText = "Rainy & Wet"; iconEmoji = "🌧️"; }
-            else if (temp < 5) { weatherCategory = "freezing"; conditionText = "Very Cold"; iconEmoji = "❄️"; }
-            else if (temp <= 15) { weatherCategory = "chilly"; conditionText = "Cool & Chilly"; iconEmoji = "🧥"; }
+            if (precip > 0 || wcode >= 50) { conditionText = "Rainy & Wet"; iconEmoji = "🌧️"; }
+            else if (temp < 5) { conditionText = "Very Cold"; iconEmoji = "❄️"; }
+            else if (temp <= 15) { conditionText = "Cool & Chilly"; iconEmoji = "🧥"; }
 
             document.getElementById('weather-condition').innerText = conditionText;
             document.getElementById('weather-temp').innerText = `${temp}°C`;
@@ -878,7 +872,11 @@
             const endStop = allStopsData.find(s => s.id === document.getElementById('stop-end-select').value);
 
             if (!isBackground) {
-                document.getElementById('directions-container').innerHTML = `<div class="text-center text-slate-400 py-6 text-xs">Fetching live schedule...</div>`;
+                document.getElementById('directions-container').innerHTML = `
+                    <div class="text-center text-emerald-700 py-6 text-xs font-bold animate-pulse">
+                        🔄 Fetching live schedule instantly...
+                    </div>
+                `;
             }
 
             try {
@@ -887,11 +885,9 @@
                 const data = await response.json();
                 renderForecast(data, 'directions-container', 'board-stop-name');
 
-                // Kiểm tra nếu có chuyển tuyến khác line thì load thêm Live Board chặng 2 cho trạm Green Line trung tâm
                 const leg2Wrapper = document.getElementById('leg2-board-wrapper');
                 if (startStop && endStop && startStop.line !== endStop.line) {
                     leg2Wrapper.classList.remove('hidden');
-                    // Fetch trạm Green line gần nhất (ví dụ trạm 'STS' hoặc trạm 'HAR')
                     const transferStopId = endStop.line === 'green' ? 'STS' : 'ABB';
                     const res2 = await fetch(`${BASE_URL}/forecast?stop=${transferStopId}`);
                     const data2 = await res2.json();
@@ -902,7 +898,7 @@
 
                 document.getElementById('last-updated').innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
             } catch (error) {
-                document.getElementById('directions-container').innerHTML = `<div class="text-center text-red-500 py-6 text-xs">Could not retrieve live arrivals.</div>`;
+                document.getElementById('directions-container').innerHTML = `<div class="text-center text-red-500 py-6 text-xs font-semibold">Could not retrieve live arrivals.</div>`;
             }
         }
 
