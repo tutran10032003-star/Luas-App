@@ -53,6 +53,33 @@
         .buddy-attraction { border:1px solid #d7eee6; background:rgba(255,255,255,.9); border-radius:14px; padding:9px 10px; text-align:left; }
         .buddy-attraction:hover { background:#fff4d6; border-color:#f6c65d; }
         #buddy-chat-log { max-height:220px; overflow-y:auto; }
+
+        /* RESPONSIVE MEDIA QUERIES FOR MOBILE */
+        @media (max-width: 768px) {
+            header .max-w-5xl {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            header .flex.items-center.gap-2 {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .tab-switcher-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .tab-switcher-container button {
+                flex: 1;
+                text-align: center;
+                padding-left: 4px;
+                padding-right: 4px;
+                font-size: 11px;
+            }
+            #leaflet-map {
+                height: 350px !important;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-emerald-200">
@@ -63,40 +90,40 @@
             <div class="flex items-center space-x-3">
                 <span class="text-3xl">🚋</span>
                 <div>
-                    <h1 class="font-bold text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
-                    <p class="text-xs text-emerald-600 font-medium">Live Luas, Interactive Map & Weather 🌿 <span id="realtime-clock" class="text-emerald-700 font-bold ml-1"></span></p>
+                    <h1 class="font-bold text-base sm:text-lg text-emerald-800 leading-tight">Friendly Eco-Companion</h1>
+                    <p class="text-[11px] sm:text-xs text-emerald-600 font-medium">Live Luas & Weather 🌿 <span id="realtime-clock" class="text-emerald-700 font-bold ml-1"></span></p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 <!-- Tab Switchers -->
-                <div class="flex bg-emerald-50 p-1 rounded-2xl border border-emerald-100">
+                <div class="flex bg-emerald-50 p-1 rounded-2xl border border-emerald-100 tab-switcher-container">
                     <button onclick="switchTab('forecast')" id="tab-btn-forecast" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-sm">
-                        ✨ Trip & Forecast
+                        ✨ Trip
                     </button>
                     <button onclick="switchTab('map')" id="tab-btn-map" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
-                        🗺️ Live Map
+                        🗺️ Map
                     </button>
                     <button onclick="switchTab('weather')" id="tab-btn-weather" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-emerald-700 hover:bg-emerald-100/60">
                         🌦️ Weather
                     </button>
                 </div>
                 <!-- GPS Location Button -->
-                <button onclick="findNearestStop()" id="btn-nearest" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-xl transition border border-emerald-200 flex items-center gap-1.5 shadow-sm">
-                    📍 My GPS Location
+                <button onclick="findNearestStop()" id="btn-nearest" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2 rounded-xl transition border border-emerald-200 flex items-center gap-1 shadow-sm whitespace-nowrap">
+                    📍 GPS
                 </button>
             </div>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <main class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
         <!-- CỘT TRÁI: MASCOT & AI CHAT -->
-        <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center sticky top-20">
+        <div class="md:col-span-1 bg-white p-4 sm:p-5 rounded-3xl shadow-sm border border-emerald-100 flex flex-col items-center text-center md:sticky md:top-20">
             <div class="relative mb-3">
-                <div id="mascot-container" class="w-28 h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
-                    <svg width="95" height="95" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div id="mascot-container" class="w-24 h-24 sm:w-28 sm:h-28 mascot-float flex items-center justify-center p-1 bg-emerald-50 rounded-full border-2 border-emerald-200 shadow-inner overflow-hidden relative">
+                    <svg width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="25" y="32" width="50" height="42" rx="14" fill="#10B981" stroke="#047857" stroke-width="3"/>
                       <path d="M30 32H70C70 25 30 25 30 32Z" fill="#F1F5F9" stroke="#047857" stroke-width="2"/>
                       <rect x="32" y="38" width="36" height="22" rx="6" fill="#F0FDF4" stroke="#047857" stroke-width="2"/>
@@ -161,11 +188,11 @@
         </div>
 
         <!-- CỘT PHẢI: NỘI DUNG TABS -->
-        <div class="md:col-span-2 space-y-4">
+        <div class="md:col-span-2 space-y-4 w-full min-w-0">
             
             <!-- TAB 1: TRIP PLANNER & LIVE FORECAST -->
             <div id="tab-content-forecast" class="space-y-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-emerald-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-sm border border-emerald-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="stop-start-select" class="block text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">Departure Station</label>
                         <select id="stop-start-select" onchange="onStartStopChange()" class="w-full px-4 py-2.5 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-semibold bg-emerald-50/30 text-emerald-900">
@@ -204,17 +231,17 @@
 
                 <!-- LIVE BOARD CHẶNG 1 -->
                 <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden">
-                    <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
+                    <div class="bg-emerald-800 text-white px-5 sm:px-6 py-4 flex items-center justify-between">
                         <div>
-                            <h2 id="board-stop-name" class="font-bold text-base">Select a departure station</h2>
-                            <p id="last-updated" class="text-[11px] text-emerald-200">Last updated: Never</p>
+                            <h2 id="board-stop-name" class="font-bold text-sm sm:text-base">Select a departure station</h2>
+                            <p id="last-updated" class="text-[10px] sm:text-[11px] text-emerald-200">Last updated: Never</p>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
-                            ● Live Board Leg 1
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 whitespace-nowrap">
+                            ● Leg 1
                         </span>
                     </div>
 
-                    <div id="directions-container" class="p-5 space-y-4">
+                    <div id="directions-container" class="p-4 sm:p-5 space-y-4">
                         <div class="text-center text-slate-400 py-8 text-sm font-medium">
                             Please choose your departure station above to view live arrivals. 🚊
                         </div>
@@ -223,31 +250,31 @@
 
                 <!-- LIVE BOARD CHẶNG 2 -->
                 <div id="leg2-board-wrapper" class="hidden bg-white rounded-3xl shadow-sm border border-teal-100 overflow-hidden">
-                    <div class="bg-teal-700 text-white px-6 py-4 flex items-center justify-between">
+                    <div class="bg-teal-700 text-white px-5 sm:px-6 py-4 flex items-center justify-between">
                         <div>
-                            <h2 id="leg2-board-stop-name" class="font-bold text-base">Arrival Station Schedule</h2>
-                            <p class="text-[11px] text-teal-200">Live arrivals at destination</p>
+                            <h2 id="leg2-board-stop-name" class="font-bold text-sm sm:text-base">Arrival Station Schedule</h2>
+                            <p class="text-[10px] sm:text-[11px] text-teal-200">Live arrivals at destination</p>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-500/30 text-teal-200 border border-teal-400/30">
-                            ● Live Board Leg 2
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-teal-500/30 text-teal-200 border border-teal-400/30 whitespace-nowrap">
+                            ● Leg 2
                         </span>
                     </div>
 
-                    <div id="leg2-directions-container" class="p-5 space-y-4"></div>
+                    <div id="leg2-directions-container" class="p-4 sm:p-5 space-y-4"></div>
                 </div>
             </div>
 
             <!-- TAB 2: LIVE MAP -->
             <div id="tab-content-map" class="hidden space-y-4">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
-                    <div class="flex items-center justify-between">
+                <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                            <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
+                            <h3 class="font-bold text-emerald-900 text-sm sm:text-base flex items-center gap-2">
                                 <span>🗺️</span> Interactive Route Map (A to B)
                             </h3>
-                            <p class="text-xs text-slate-500">🟣 Departure station, 🏁 Arrival destination icon!</p>
+                            <p class="text-[11px] sm:text-xs text-slate-500">🟣 Departure station, 🏁 Arrival destination icon!</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div>
                             <button onclick="fitRouteBounds()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition">Fit route</button>
                         </div>
                     </div>
@@ -255,7 +282,7 @@
                     <div id="leaflet-map"></div>
 
                     <!-- Map Legend Bar -->
-                    <div class="flex flex-wrap items-center justify-center gap-6 pt-2 text-[11px] font-bold text-slate-600 border-t border-emerald-100">
+                    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-2 text-[11px] font-bold text-slate-600 border-t border-emerald-100">
                         <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-pink-500 inline-block border-2 border-white shadow"></span> Departure Station</div>
                         <div class="flex items-center gap-1.5"><span class="text-sm">🏁</span> Arrival Destination</div>
                     </div>
@@ -264,10 +291,10 @@
 
             <!-- TAB 3: WEATHER & OUTFIT ADVISOR -->
             <div id="tab-content-weather" class="hidden space-y-4">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-5">
+                <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-emerald-100 space-y-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                            <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
+                            <h3 class="font-bold text-emerald-900 text-sm sm:text-base flex items-center gap-2">
                                 <span>🌦️</span> Weather & Outfit Advisor
                             </h3>
                             <p class="text-xs text-slate-500">Real-time weather data & tailored outfit recommendations.</p>
@@ -280,27 +307,26 @@
                     </div>
 
                     <!-- Weather Card Body -->
-                    <div id="weather-card-body" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div id="weather-card-body" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-5 sm:p-6 rounded-2xl shadow-sm flex items-center justify-between">
                         <div class="space-y-1">
-                            <p id="weather-condition" class="text-lg font-bold">Loading weather...</p>
-                            <p id="weather-temp" class="text-3xl font-extrabold">--°C</p>
-                            <p id="weather-wind" class="text-xs text-emerald-100">Wind speed: -- km/h</p>
+                            <p id="weather-condition" class="text-base sm:text-lg font-bold">Loading weather...</p>
+                            <p id="weather-temp" class="text-2xl sm:text-3xl font-extrabold">--°C</p>
+                            <p id="weather-wind" class="text-[11px] sm:text-xs text-emerald-100">Wind speed: -- km/h</p>
                         </div>
-                        <!-- ICON THỜI TIẾT SINH ĐỘNG (THAY CHO ÁO KHOÁC THÔ) -->
-                        <div id="weather-icon-lg" class="text-6xl drop-shadow-md">🌤️</div>
+                        <div id="weather-icon-lg" class="text-5xl sm:text-6xl drop-shadow-md">🌤️</div>
                     </div>
 
-                    <!-- Dynamic Outfit Recommendations (TỰ ĐỘNG THAY ĐỔI THEO THỜI TIẾT) -->
-                    <div class="bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl space-y-3">
-                        <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2">
+                    <!-- Dynamic Outfit Recommendations -->
+                    <div class="bg-emerald-50/60 border border-emerald-100 p-4 sm:p-5 rounded-2xl space-y-3">
+                        <h4 class="font-bold text-emerald-900 text-xs sm:text-sm flex items-center gap-2">
                             <span>👕</span> Dynamic Outfit & Gear Recommendations:
                         </h4>
                         <div id="outfit-recommendations" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2 shadow-sm">
-                                <span id="outfit-icon-1" class="text-lg">🧥</span> <span id="outfit-text-1">Light sweater or casual shirt</span>
+                                <span id="outfit-icon-1" class="text-base sm:text-lg">🧥</span> <span id="outfit-text-1">Light sweater or casual shirt</span>
                             </div>
                             <div class="bg-white p-3 rounded-xl border border-emerald-100 text-xs font-medium text-emerald-900 flex items-center gap-2 shadow-sm">
-                                <span id="outfit-icon-2" class="text-lg">👟</span> <span id="outfit-text-2">Comfortable walking sneakers</span>
+                                <span id="outfit-icon-2" class="text-base sm:text-lg">👟</span> <span id="outfit-text-2">Comfortable walking sneakers</span>
                             </div>
                         </div>
                     </div>
@@ -611,12 +637,12 @@
                 return;
             }
             const btn = document.getElementById('btn-nearest');
-            btn.innerText = 'Locating GPS...';
+            btn.innerText = 'Locating...';
 
             navigator.geolocation.getCurrentPosition(position => {
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
-                btn.innerText = '📍 My GPS Location';
+                btn.innerText = '📍 GPS';
 
                 if (leafletMap) {
                     if (userGpsMarker) leafletMap.removeLayer(userGpsMarker);
@@ -650,7 +676,7 @@
                     onStartStopChange();
                 }
             }, () => {
-                btn.innerText = '📍 My GPS Location';
+                btn.innerText = '📍 GPS';
             });
         }
 
@@ -702,7 +728,6 @@
             });
         }
 
-        // KHI CHỌN ATTRACTION: TỰ ĐỘNG LINK LUAS ROUTE + FETCH THỜI TIẾT TẠI ĐÓ CHO BUDDY
         async function buddyShowAttraction(attraction) {
             buddyAddMessage(`How can I get to ${attraction.name}?`, 'user');
 
@@ -716,7 +741,6 @@
                 document.getElementById('stop-end-select').value = targetStop.id;
                 onEndStopChange();
 
-                // Fetch weather trực tiếp tại tọa độ attraction để Buddy thông báo thời tiết điểm đến
                 let weatherBrief = "";
                 try {
                     const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${attraction.lat}&longitude=${attraction.lng}&current=temperature_2m,precipitation,weather_code&timezone=Europe/Dublin`);
@@ -748,8 +772,21 @@
             switchTab('map');
             if (leafletMap) {
                 setTimeout(() => {
-                    leafletMap.setView([attraction.lat, attraction.lng], 16);
-                    L.popup().setLatLng([attraction.lat, attraction.lng]).setContent(`<b>${attraction.icon} ${attraction.name}</b><br>${attraction.desc}`).openOn(leafletMap);
+                    const zoomLevel = attraction.name === "Phoenix Park" ? 14 : 16;
+                    leafletMap.setView([attraction.lat, attraction.lng], zoomLevel);
+
+                    const attractionMarker = L.marker([attraction.lat, attraction.lng], {
+                        icon: L.divIcon({
+                            className: 'custom-attraction-marker',
+                            html: `<div style="background:linear-gradient(135deg,#10B981,#047857); color:white; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; border:3px solid white; box-shadow:0 6px 16px rgba(0,0,0,0.3);"><span>${attraction.icon}</span></div>`,
+                            iconSize: [38, 38],
+                            iconAnchor: [19, 19]
+                        })
+                    }).addTo(leafletMap);
+
+                    attractionMarker.bindPopup(`<b>${attraction.icon} ${attraction.name}</b><br>${attraction.desc}`).openPopup();
+                    mapMarkers.push(attractionMarker);
+                    leafletMap.invalidateSize();
                 }, 150);
             }
         }
@@ -826,7 +863,6 @@
             }
         }
 
-        // HỆ THỐNG DYNAMIC OUTFIT & ICON THỜI TIẾT TỰ ĐỘNG THAY ĐỔI THEO THỰC TẾ
         function renderWeatherInfo(current, stopName) {
             const temp = current.temperature_2m;
             const precip = current.precipitation;
@@ -860,7 +896,6 @@
             document.getElementById('weather-wind').innerText = `Wind speed: ${wind} km/h at ${stopName}`;
             document.getElementById('weather-icon-lg').innerText = iconEmoji;
 
-            // Tự động cập nhật nội dung Dynamic Outfit
             document.getElementById('outfit-icon-1').innerText = outfit1.icon;
             document.getElementById('outfit-text-1').innerText = outfit1.text;
             document.getElementById('outfit-icon-2').innerText = outfit2.icon;
